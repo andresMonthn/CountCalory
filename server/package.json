@@ -5,8 +5,8 @@
   "main": "server.js",
   "scripts": {
    
-    "start": "react-scripts start",
-    "build": "react-scripts build"
+    "start": "node index.js"
+    
   },
   "dependencies": {
     "cors": "^2.8.5",
