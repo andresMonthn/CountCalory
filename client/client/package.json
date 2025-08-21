@@ -4,11 +4,8 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "lint": "eslint .",
-    "preview": "vite preview"
+   "build": "react-scripts build"
   },
   "dependencies": {
     "react": "^19.1.1",
