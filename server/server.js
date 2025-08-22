@@ -92,3 +92,8 @@ export default connectDB;
 app.get('/', (req, res) => {
   res.send('Servidor funcionando 👍');
 });
+
+
+app.listen(PORT, () => {
+  console.log(`🚀 Server running on port ${PORT}`);
+});
