@@ -46,7 +46,10 @@ const connectDB = async () => {
   }
 };
 
-module.exports = connectDB;
+connectDB().then(() => {
+  app.listen(PORT, () => console.log(`🚀 Servidor corriendo en http://localhost:${PORT}`));
+}).catch((err) => console.error("❌ Error al conectar a MongoDB:", err));
+
 // Conexión a MongoDB local
 // mongoose
 //   .connect("mongodb://127.0.0.1:27017/caloriesDB", {
