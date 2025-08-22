@@ -1,5 +1,6 @@
 import express from "express";
 import mongoose from "mongoose";
+import path from 'path';
 import cors from "cors";
 import summaryRoutes from "./routes/summaryRoutes.js";
 mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true });//para el despliege en MongoDB Atlas
@@ -21,8 +22,9 @@ const __dirname = path.resolve();
 app.use(express.static(path.join(__dirname, 'client/build')));
 
 app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'client/build', 'index.html'));
+  res.sendFile(path.join(__dirname, '../client/build', 'index.html'));
 });
+
 
 // Conexión a MongoDB
 mongoose
