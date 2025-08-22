@@ -32,10 +32,17 @@ app.get("*", (req, res) => {
 // useNewUrlParser: true, useUnifiedTopology: true });
 const uri = process.env.MONGO_URI;
 
-mongoose.connect(uri, {useNewUrlParser: true, useUnifiedTopology: true})
-    .then(() => console.log('✅ Conectado a MongoDB Atlas'))
-    .catch(err => console.error('❌ Error de conexión:', err));
+const connectDB = async () => {
+  try {
+    const conn = await mongoose.connect(process.env.MONGODB_URI);
+    console.log(`MongoDB Connected: ${conn.connection.host}`);
+  } catch (error) {
+    console.error('Error connecting to MongoDB:', error.message);
+    process.exit(1);
+  }
+};
 
+module.exports = connectDB;
 // Conexión a MongoDB local
 // mongoose
 //   .connect("mongodb://127.0.0.1:27017/caloriesDB", {
