@@ -46,7 +46,14 @@ const exerciseOptions = [
   { name: "Bicicleta 30 min", calories: 250 },
   { name: "Natación 30 min", calories: 200 },
   { name: "Yoga 30 min", calories: 120 },
+  { name: "Pesas 1hra", calorias: 540 }
 ];
+
+ const API_BASE_URL = import.meta.env.PROD 
+  ? 'https://countcalory.onrender.com'
+   : 'http://localhost:4000';
+  
+   const API_SUMMARY = `${API_BASE_URL}/api/summary`;
 
 export default function CalorieCounter() {
   const [budget, setBudget] = useState(2000);
@@ -57,6 +64,9 @@ export default function CalorieCounter() {
   const [output, setOutput] = useState(null);
   const [history, setHistory] = useState([]);
 
+
+
+ 
   // Agregar comida
   const addFood = () => setFoodList([...foodList, selectedFood]);
 
@@ -87,7 +97,7 @@ export default function CalorieCounter() {
   const saveSummary = async () => {
     if (!output) return;
     try {
-      const res = await fetch("http://localhost:4000/api/summary", {
+      const res = await fetch(API_SUMMARY, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(output),
@@ -104,7 +114,7 @@ export default function CalorieCounter() {
   useEffect(() => {
     const fetchHistory = async () => {
       try {
-        const res = await fetch("http://localhost:4000/api/summary");
+        const res = await fetch(API_SUMMARY);
         const data = await res.json();
         setHistory(data);
       } catch (err) {
@@ -118,7 +128,7 @@ export default function CalorieCounter() {
     <div className='Scrilles'>
       <div className="CalorieCounter">
         <h1 className="text-2xl font-bold mb-4">Contador de Calorías</h1>
-        <img src="image.png" alt="CountCalory Logo" className="w-24 mb-4" />
+        <img src="image.png" alt="CountCalory Logo" className="w-24 mb-4"/>
         <label>Presupuesto diario:</label>
         <input
           type="number"
