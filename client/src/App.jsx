@@ -118,7 +118,7 @@ export default function CalorieCounter() {
     <div className='Scrilles'>
       <div className="CalorieCounter">
         <h1 className="text-2xl font-bold mb-4">Contador de Calorías</h1>
-
+        <img src="image.png" alt="CountCalory Logo" className="w-24 mb-4" />
         <label>Presupuesto diario:</label>
         <input
           type="number"
