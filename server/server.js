@@ -1,10 +1,15 @@
-import express from "express";
-import mongoose from "mongoose";
+import cors from 'cors';
+import express from 'express';
+import mongoose from 'mongoose';
 import path from 'path';
-import cors from "cors";
-import summaryRoutes from "./routes/summaryRoutes.js";
-mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true });//para el despliege en MongoDB Atlas
-//mongoose.connect("mongodb://
+
+import summaryRoutes from './routes/summaryRoutes.js';
+
+mongoose.connect(process.env.MONGO_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true
+});  // para el despliege en MongoDB Atlas
+// mongoose.connect("mongodb://
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -14,15 +19,15 @@ app.use(cors());
 app.use(express.json());
 
 // Rutas
-app.use("/api/summary", summaryRoutes);
+app.use('/api/summary', summaryRoutes);
 
 
 // ---- SERVIR FRONTEND REACT ----
 const __dirname = path.resolve();
-app.use(express.static(path.join(__dirname, "../client/dist")));
+app.use(express.static(path.join(__dirname, '../client/dist')));
 
-app.get("*", (req, res) => {
-  res.sendFile(path.join(__dirname, "../client/dist/index.html"));
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, '../client/dist/index.html'));
 });
 
 
@@ -34,11 +39,14 @@ const uri = process.env.MONGO_URI;
 
 const connectDB = async () => {
   try {
-    const conn = await mongoose.connect(process.env.MONGODB_URI, {
-      // Opciones modernas (si las necesitas)
-      serverSelectionTimeoutMS: 5000,
-      socketTimeoutMS: 45000,
-    });
+    // Usa la variable de entorno de Render
+    const MONGODB_URI = process.env.MONGODB_URI || "mongodb+srv://andres777monthana:TU_PASSWORD@cluster0.d7j9y2u.mongodb.net/tu_db?retryWrites=true&w=majority&appName=Cluster0";
+
+    if (!MONGODB_URI) {
+      throw new Error('MongoDB URI is not defined');
+    }
+
+    const conn = await mongoose.connect(MONGODB_URI);
     console.log(`MongoDB Connected: ${conn.connection.host}`);
   } catch (error) {
     console.error('Error connecting to MongoDB:', error.message);
@@ -56,11 +64,12 @@ export default connectDB;
 //   })
 //   .then(() => {
 //     console.log("✅ Conectado a MongoDB");
-//     app.listen(PORT, () => console.log(`🚀 Servidor corriendo en http://localhost:${PORT}`));
+//     app.listen(PORT, () => console.log(`🚀 Servidor corriendo en
+//     http://localhost:${PORT}`));
 //   })
 //   .catch((err) => console.error("❌ Error al conectar a MongoDB:", err));
 
 
-app.get("/", (req, res) => {
-  res.send("Servidor funcionando 👍");
+app.get('/', (req, res) => {
+  res.send('Servidor funcionando 👍');
 });
