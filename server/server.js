@@ -6,8 +6,7 @@ import path from 'path';
 import summaryRoutes from './routes/summaryRoutes.js';
 
 mongoose.connect(process.env.MONGO_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true
+
 });  // para el despliege en MongoDB Atlas
 // mongoose.connect("mongodb://
 
