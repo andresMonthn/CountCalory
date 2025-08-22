@@ -26,6 +26,16 @@ app.get("*", (req, res) => {
 });
 
 
+// conexion a Productora de MongoDB Atlas
+
+// mongoose.connect("mongodb+srv://<usuario>:<contraseña>@cluster.mongodb.net/caloriesDB?retryWrites=true&w=majority", {
+// useNewUrlParser: true, useUnifiedTopology: true });
+const uri = process.env.MONGO_URI;
+
+mongoose.connect(uri, {useNewUrlParser: true, useUnifiedTopology: true})
+    .then(() => console.log('✅ Conectado a MongoDB Atlas'))
+    .catch(err => console.error('❌ Error de conexión:', err));
+
 // Conexión a MongoDB
 mongoose
   .connect("mongodb://127.0.0.1:27017/caloriesDB", {
