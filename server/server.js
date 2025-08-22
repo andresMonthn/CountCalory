@@ -36,17 +36,17 @@ mongoose.connect(uri, {useNewUrlParser: true, useUnifiedTopology: true})
     .then(() => console.log('✅ Conectado a MongoDB Atlas'))
     .catch(err => console.error('❌ Error de conexión:', err));
 
-// Conexión a MongoDB
-mongoose
-  .connect("mongodb://127.0.0.1:27017/caloriesDB", {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  })
-  .then(() => {
-    console.log("✅ Conectado a MongoDB");
-    app.listen(PORT, () => console.log(`🚀 Servidor corriendo en http://localhost:${PORT}`));
-  })
-  .catch((err) => console.error("❌ Error al conectar a MongoDB:", err));
+// Conexión a MongoDB local
+// mongoose
+//   .connect("mongodb://127.0.0.1:27017/caloriesDB", {
+//     useNewUrlParser: true,
+//     useUnifiedTopology: true,
+//   })
+//   .then(() => {
+//     console.log("✅ Conectado a MongoDB");
+//     app.listen(PORT, () => console.log(`🚀 Servidor corriendo en http://localhost:${PORT}`));
+//   })
+//   .catch((err) => console.error("❌ Error al conectar a MongoDB:", err));
 
 
 app.get("/", (req, res) => {
