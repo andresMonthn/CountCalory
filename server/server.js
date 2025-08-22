@@ -46,9 +46,7 @@ const connectDB = async () => {
   }
 };
 
-connectDB().then(() => {
-  app.listen(PORT, () => console.log(`🚀 Servidor corriendo en http://localhost:${PORT}`));
-}).catch((err) => console.error("❌ Error al conectar a MongoDB:", err));
+export default connectDB;
 
 // Conexión a MongoDB local
 // mongoose
