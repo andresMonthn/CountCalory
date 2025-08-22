@@ -2,10 +2,6 @@ import cors from 'cors';
 import express from 'express';
 import mongoose from 'mongoose';
 import path from 'path';
-import dotenv from 'dotenv';
-
-dotenv.config();
-
 import summaryRoutes from './routes/summaryRoutes.js';
 
 mongoose.connect(process.env.MONGO_URI, {
@@ -41,17 +37,38 @@ const uri = process.env.MONGO_URI;
 
 const connectDB = async () => {
   try {
-    // Usa la variable de entorno de Render
-    const MONGODB_URI = process.env.MONGODB_URI || "mongodb+srv://andres777monthana:TU_PASSWORD@cluster0.d7j9y2u.mongodb.net/tu_db?retryWrites=true&w=majority&appName=Cluster0";
-
-    if (!MONGODB_URI) {
-      throw new Error('MongoDB URI is not defined');
+    // URI directamente desde las variables de Render
+    const uri = process.env.MONGODB_URI;
+    
+    console.log('Checking MongoDB connection...');
+    
+    if (!uri) {
+      throw new Error('❌ MONGODB_URI is not defined in Render environment');
     }
 
-    const conn = await mongoose.connect(MONGODB_URI);
-    console.log(`MongoDB Connected: ${conn.connection.host}`);
+    if (!uri.startsWith('mongodb+srv://')) {
+      throw new Error('❌ Invalid MongoDB URI format');
+    }
+
+    console.log('🔗 Connecting to MongoDB Atlas...');
+    
+    const conn = await mongoose.connect(uri, {
+      serverSelectionTimeoutMS: 5000,
+    });
+    
+    console.log(`✅ MongoDB Connected to database: ${conn.connection.name}`);
+    console.log(`📍 Host: ${conn.connection.host}`);
+    
   } catch (error) {
-    console.error('Error connecting to MongoDB:', error.message);
+    console.error('❌ MongoDB Connection Error:', error.message);
+    
+    if (error.code === 8000) {
+      console.log('🔐 Authentication failed. Please check:');
+      console.log('1. ✅ User: andres777monthana exists in Atlas');
+      console.log('2. ✅ Password is correct (1111)');
+      console.log('3. ✅ Network access allows 0.0.0.0/0');
+    }
+    
     process.exit(1);
   }
 };
