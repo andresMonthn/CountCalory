@@ -277,6 +277,7 @@ export default function CalorieCounter() {
           )}
         </div>
       </div>
+      <div><p>Pagina generada por Oscar Andres CL.. en contruccion,</p></div>
     </div>
   );
 }
