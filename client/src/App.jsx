@@ -1,4 +1,4 @@
-import "./App.css";
+import './App.css'
 import { useState, useEffect } from "react";
 
 const foodOptions = [
@@ -46,13 +46,10 @@ const exerciseOptions = [
   { name: "Bicicleta 30 min", calories: 250 },
   { name: "Natación 30 min", calories: 200 },
   { name: "Yoga 30 min", calories: 120 },
-  { name: "Pesas 1hra", calorias: 540 },
+  { name: "Pesas 1hra", calories: 540 },
 ];
 
-const API_BASE_URL = import.meta.env.PROD
-  ? "https://countcalory.onrender.com"
-  : "http://localhost:4000";
-
+const API_BASE_URL = "https://countcalory.onrender.com";
 const API_SUMMARY = `${API_BASE_URL}/api/summary`;
 
 export default function CalorieCounter() {
@@ -63,21 +60,19 @@ export default function CalorieCounter() {
   const [exerciseList, setExerciseList] = useState([]);
   const [output, setOutput] = useState(null);
   const [history, setHistory] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   // Agregar comida
   const addFood = () => setFoodList([...foodList, selectedFood]);
 
   // Agregar ejercicio
-  const addExercise = () =>
-    setExerciseList([...exerciseList, selectedExercise]);
+  const addExercise = () => setExerciseList([...exerciseList, selectedExercise]);
 
   // Eliminar comida por índice
-  const removeFood = (index) =>
-    setFoodList(foodList.filter((_, i) => i !== index));
+  const removeFood = (index) => setFoodList(foodList.filter((_, i) => i !== index));
 
   // Eliminar ejercicio por índice
-  const removeExercise = (index) =>
-    setExerciseList(exerciseList.filter((_, i) => i !== index));
+  const removeExercise = (index) => setExerciseList(exerciseList.filter((_, i) => i !== index));
 
   // Calcular resumen
   const calculate = () => {
@@ -96,193 +91,192 @@ export default function CalorieCounter() {
   // Guardar resumen en backend
   const saveSummary = async () => {
     if (!output) return;
+    
+    setLoading(true);
     try {
       const res = await fetch(API_SUMMARY, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(output),
+        headers: { 
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          ...output,
+          createdAt: new Date().toISOString()
+        }),
       });
+
+      if (!res.ok) {
+        const errorData = await res.text();
+        throw new Error(`HTTP ${res.status}: ${errorData}`);
+      }
+
       const data = await res.json();
-      setHistory([data, ...history]);
-      alert("Resumen guardado ✅");
+      setHistory(prev => [data, ...prev]);
+      alert("✅ Resumen guardado correctamente");
+      
     } catch (err) {
       console.error("Error guardando resumen:", err);
+      alert("❌ Error al guardar. Verifica la consola para más detalles.");
+    } finally {
+      setLoading(false);
     }
   };
 
   // Cargar historial
-  // Cargar historial - CON MEJOR MANEJO DE ERRORES
   useEffect(() => {
     const fetchHistory = async () => {
       try {
-        const res = await fetch("https://countcalory.onrender.com/api/summary");
+        const res = await fetch(API_SUMMARY, {
+          headers: {
+            'Accept': 'application/json',
+          }
+        });
 
         if (!res.ok) {
           throw new Error(`HTTP error! status: ${res.status}`);
         }
 
-        const data = await res.json();
+        const contentType = res.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/json')) {
+          throw new Error('Response is not JSON');
+        }
 
-        // ✅ VERIFICAR CRÍTICO: asegurar que siempre sea array
+        const data = await res.json();
+        
         if (Array.isArray(data)) {
           setHistory(data);
         } else {
-          console.warn("⚠️ Expected array but got:", data);
-          setHistory([]); // ← array vacío como fallback
+          console.warn('⚠️ Expected array but got:', data);
+          setHistory([]);
         }
+        
       } catch (err) {
         console.error("Error cargando historial:", err);
-        setHistory([]); // ← array vacío en caso de error
+        setHistory([]);
       }
     };
+    
     fetchHistory();
   }, []);
 
   return (
-    <>
-      <div className="Scrilles">
-        <div className="CalorieCounter">
-          <h1 className="text-2xl font-bold mb-4">Contador de Calorías</h1>
-          <img src="image.png" alt="CountCalory Logo" className="w-24 mb-4" />
-          <label>Presupuesto diario:</label>
-          <input
-            type="number"
-            value={budget}
-            onChange={(e) => setBudget(Number(e.target.value))}
-            className="border p-1 w-full mb-4"
-          />
+    <div className='Scrilles'>
+      <div className="CalorieCounter">
+        <h1 className="text-2xl font-bold mb-4">Contador de Calorías</h1>
+        <img src="image.png" alt="CountCalory Logo" className="w-24 mb-4"/>
+        
+        <label>Presupuesto diario:</label>
+        <input
+          type="number"
+          value={budget}
+          onChange={(e) => setBudget(Number(e.target.value))}
+          className="border p-1 w-full mb-4"
+        />
 
-          {/* Selección de comidas */}
-          <div className="mb-4">
-            <label>Alimento:</label>
-            <select
-              className="border p-1 w-full mb-2"
-              value={JSON.stringify(selectedFood)}
-              onChange={(e) => setSelectedFood(JSON.parse(e.target.value))}>
-              {foodOptions.map((f, i) => (
-                <option key={i} value={JSON.stringify(f)}>
-                  {f.name} ({f.calories} Cal)
-                </option>
-              ))}
-            </select>
-            <button
-              onClick={addFood}
-              className="bg-blue-500 text-white px-3 py-1 rounded">
-              Agregar comida
-            </button>
-
-            {/* Lista de comidas agregadas */}
-            {foodList.length > 0 && (
-              <ul className="mt-2">
-                {foodList.map((f, i) => (
-                  <li
-                    key={i}
-                    className="flex justify-between items-center bg-gray-200 p-1 my-1 rounded">
-                    {f.name} ({f.calories} Cal)
-                    <button
-                      onClick={() => removeFood(i)}
-                      className="text-red-500 ml-2">
-                      Eliminar
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
-
-          {/* Selección de ejercicios */}
-          <div className="mb-4 controls">
-            <label>Ejercicio:</label>
-            <select
-              className="border p-1 w-full mb-2"
-              value={JSON.stringify(selectedExercise)}
-              onChange={(e) => setSelectedExercise(JSON.parse(e.target.value))}>
-              {exerciseOptions.map((e, i) => (
-                <option key={i} value={JSON.stringify(e)}>
-                  {e.name} ({e.calories} Cal)
-                </option>
-              ))}
-            </select>
-            <button
-              onClick={addExercise}
-              className="bg-green-500 text-white px-3 py-1 rounded">
-              Agregar ejercicio
-            </button>
-
-            {/* Lista de ejercicios agregados */}
-            {exerciseList.length > 0 && (
-              <ul className="mt-2">
-                {exerciseList.map((e, i) => (
-                  <li
-                    key={i}
-                    className="flex justify-between items-center bg-gray-200 p-1 my-1 rounded">
-                    {e.name} ({e.calories} Cal)
-                    <button
-                      onClick={() => removeExercise(i)}
-                      className="text-red-500 ml-2">
-                      Eliminar
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
-
-          <button
-            onClick={calculate}
-            className="bg-gray-700 text-white px-3 py-1 rounded mb-4">
-            Calcular resumen
+        {/* Selección de comidas */}
+        <div className="mb-4">
+          <label>Alimento:</label>
+          <select
+            className="border p-1 w-full mb-2"
+            value={JSON.stringify(selectedFood)}
+            onChange={(e) => setSelectedFood(JSON.parse(e.target.value))}
+          >
+            {foodOptions.map((f, i) => (
+              <option key={i} value={JSON.stringify(f)}>
+                {f.name} ({f.calories} Cal)
+              </option>
+            ))}
+          </select>
+          <button onClick={addFood} className="bg-blue-500 text-white px-3 py-1 rounded">
+            Agregar comida
           </button>
 
-          {/* Resumen calculado */}
-          {output && (
-            <div className="mt-4 p-4 border rounded bg-gray-100">
-              <p>
-                <strong>{output.remaining}</strong> calorías {output.status}
-              </p>
-              <hr className="my-2" />
-              <p>Presupuesto: {output.budget}</p>
-              <p>Consumidas: {output.consumed}</p>
-              <p>Ejercicio: {output.exercise}</p>
-              <button
-                onClick={saveSummary}
-                className="mt-2 bg-purple-500 text-white px-3 py-1 rounded">
-                Guardar Resumen
-              </button>
-            </div>
+          {foodList.length > 0 && (
+            <ul className="mt-2">
+              {foodList.map((f, i) => (
+                <li key={i} className="flex justify-between items-center bg-gray-200 p-1 my-1 rounded">
+                  {f.name} ({f.calories} Cal)
+                  <button onClick={() => removeFood(i)} className="text-red-500 ml-2">Eliminar</button>
+                </li>
+              ))}
+            </ul>
           )}
+        </div>
 
-          {/* Historial de resúmenes */}
-          {/* Historial de resúmenes */}
-          <div className="mt-6">
-            <h2 className="text-xl font-bold mb-4">Historial de Resúmenes</h2>
-            {history && history.length === 0 ? ( // ✅ Verificar que history existe
-              <p>No hay resúmenes guardados.</p>
-            ) : (
-              history.map((s) => (
-                <div
-                  key={s._id || Math.random()}
-                  className="p-4 border rounded mb-2 bg-gray-50">
-                  {" "}
-                  {/* ✅ key único */}
-                  <p>
-                    <strong>{s.remaining}</strong> calorías {s.status}
-                  </p>
-                  <hr className="my-1" />
-                  <p>Presupuesto: {s.budget}</p>
-                  <p>Consumidas: {s.consumed}</p>
-                  <p>Ejercicio: {s.exercise}</p>
-                  <p className="text-sm text-gray-500 mt-1">
-                    Guardado:{" "}
-                    {new Date(s.createdAt || Date.now()).toLocaleString()}{" "}
-                    {/* ✅ fallback para fecha */}
-                  </p>
-                </div>
-              ))
-            )}
+        {/* Selección de ejercicios */}
+        <div className="mb-4 controls">
+          <label>Ejercicio:</label>
+          <select
+            className="border p-1 w-full mb-2"
+            value={JSON.stringify(selectedExercise)}
+            onChange={(e) => setSelectedExercise(JSON.parse(e.target.value))}
+          >
+            {exerciseOptions.map((e, i) => (
+              <option key={i} value={JSON.stringify(e)}>
+                {e.name} ({e.calories} Cal)
+              </option>
+            ))}
+          </select>
+          <button onClick={addExercise} className="bg-green-500 text-white px-3 py-1 rounded">
+            Agregar ejercicio
+          </button>
+
+          {exerciseList.length > 0 && (
+            <ul className="mt-2">
+              {exerciseList.map((e, i) => (
+                <li key={i} className="flex justify-between items-center bg-gray-200 p-1 my-1 rounded">
+                  {e.name} ({e.calories} Cal)
+                  <button onClick={() => removeExercise(i)} className="text-red-500 ml-2">Eliminar</button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+
+        <button
+          onClick={calculate}
+          className="bg-gray-700 text-white px-3 py-1 rounded mb-4"
+        >
+          Calcular resumen
+        </button>
+
+        {output && (
+          <div className="mt-4 p-4 border rounded bg-gray-100">
+            <p><strong>{output.remaining}</strong> calorías {output.status}</p>
+            <hr className="my-2" />
+            <p>Presupuesto: {output.budget}</p>
+            <p>Consumidas: {output.consumed}</p>
+            <p>Ejercicio: {output.exercise}</p>
+            <button
+              onClick={saveSummary}
+              disabled={loading}
+              className="mt-2 bg-purple-500 text-white px-3 py-1 rounded disabled:bg-gray-400"
+            >
+              {loading ? 'Guardando...' : 'Guardar Resumen'}
+            </button>
           </div>
+        )}
+
+        <div className="mt-6">
+          <h2 className="text-xl font-bold mb-4">Historial de Resúmenes</h2>
+          {history.length === 0 ? (
+            <p>No hay resúmenes guardados.</p>
+          ) : (
+            history.map((s, index) => (
+              <div key={index} className="p-4 border rounded mb-2 bg-gray-50">
+                <p><strong>{s.remaining}</strong> calorías {s.status}</p>
+                <hr className="my-1" />
+                <p>Presupuesto: {s.budget}</p>
+                <p>Consumidas: {s.consumed}</p>
+                <p>Ejercicio: {s.exercise}</p>
+                <p className="text-sm text-gray-500 mt-1">
+                  Guardado: {new Date(s.timestamp || s.createdAt || Date.now()).toLocaleString()}
+                </p>
+              </div>
+            ))
+          )}
         </div>
       </div>
-    </>
+    </div>
   );
 }

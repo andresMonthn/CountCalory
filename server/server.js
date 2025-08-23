@@ -23,7 +23,8 @@ const connectDB = async () => {
     console.log('🔍 Checking MongoDB connection...');
 
     if (!uri) {
-      throw new Error('❌ MONGODB_URI is not defined');
+      console.warn('⚠️ MONGODB_URI not defined, running without database');
+      return null;
     }
 
     if (!uri.startsWith('mongodb+srv://')) {
@@ -31,12 +32,18 @@ const connectDB = async () => {
     }
 
     console.log('🔗 Connecting to MongoDB Atlas...');
-    const conn = await mongoose.connect(uri);
+    const conn = await mongoose.connect(uri, {
+      serverSelectionTimeoutMS: 5000,
+      socketTimeoutMS: 45000,
+    });
+    
     console.log(`✅ MongoDB Connected to: ${conn.connection.name}`);
+    return conn;
     
   } catch (error) {
     console.error('❌ MongoDB Connection Error:', error.message);
-    process.exit(1);
+    console.log('⚠️ Running without database connection');
+    return null;
   }
 };
 
@@ -47,6 +54,7 @@ connectDB();
 app.get('/api', (req, res) => {
   res.json({
     message: 'CountCalory API is running!',
+    database: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected',
     endpoints: {
       test: '/api/test',
       summary: '/api/summary'
@@ -62,58 +70,20 @@ app.get('/api/test', (req, res) => {
   });
 });
 
-app.post('/api/summary', async (req, res) => {
-  try {
-    console.log('📦 Received summary data:', req.body);
-    res.json({
-      success: true,
-      message: 'Data received successfully',
-      data: req.body
-    });
-  } catch (error) {
-    console.error('❌ Error saving summary:', error);
-    res.status(500).json({ success: false, error: error.message });
-  }
-});
-
-// ---- SERVIR FRONTEND REACT ----
-// IMPORTANTE: Esta parte debe ir AL FINAL de las rutas de API
-
-// Servir archivos estáticos del frontend
-app.use(express.static(path.join(__dirname, '../client/dist')));
-
-// 3. FINALMENTE: catch-all para SPA (debe ir ÚLTIMO)
-app.get('*', (req, res) => {
-  if (req.path.startsWith('/api/')) {
-    return res.status(404).json({ error: 'API endpoint not found' });
-  }
-  res.sendFile(path.join(__dirname, '../client/dist/index.html'));
-});
-
-// Todas las rutas que no sean /api/* deben servir el frontend
+// ✅ Ruta GET para obtener summaries - DEBE estar ANTES del catch-all
 app.get('/api/summary', async (req, res) => {
   try {
-    console.log('📋 Fetching summaries...');
+    console.log('📋 GET /api/summary called');
     
-    // SI USAS MONGODB:
-    // const summaries = await Summary.find().sort({ createdAt: -1 });
-    // return res.json(summaries);
-
-    // TEMPORAL: Devuelve un ARRAY vacío o con datos de ejemplo
-    res.json([]); // ← Esto devuelve un array vacío
+    // Si MongoDB está conectado, usar base de datos
+    if (mongoose.connection.readyState === 1) {
+      // Aquí iría tu lógica con MongoDB
+      // const summaries = await Summary.find().sort({ createdAt: -1 });
+      // return res.json(summaries);
+    }
     
-    // O con datos de ejemplo:
-    // res.json([
-    //   {
-    //     _id: "1",
-    //     budget: 2000,
-    //     consumed: 500,
-    //     exercise: 300,
-    //     remaining: 1800,
-    //     status: "Deficit",
-    //     createdAt: new Date().toISOString()
-    //   }
-    // ]);
+    // Temporal: devolver array vacío
+    res.json([]);
     
   } catch (error) {
     console.error('❌ Error fetching summaries:', error);
@@ -121,9 +91,47 @@ app.get('/api/summary', async (req, res) => {
   }
 });
 
+// ✅ Ruta POST para crear summaries
+app.post('/api/summary', async (req, res) => {
+  try {
+    console.log('📦 POST /api/summary called with:', req.body);
+    
+    // Si MongoDB está conectado, guardar en base de datos
+    if (mongoose.connection.readyState === 1) {
+      // Aquí iría tu lógica con MongoDB
+      // const newSummary = await Summary.create(req.body);
+      // return res.json(newSummary);
+    }
+    
+    // Temporal: devolver los datos recibidos
+    res.json({
+      success: true,
+      message: 'Data received successfully (MongoDB not connected)',
+      data: req.body,
+      timestamp: new Date().toISOString()
+    });
+    
+  } catch (error) {
+    console.error('❌ Error saving summary:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// ---- SERVIR FRONTEND REACT ----
+app.use(express.static(path.join(__dirname, '../client/dist')));
+
+// ✅ Catch-all para SPA - DEBE ir ÚLTIMO
+app.get('*', (req, res) => {
+  if (req.path.startsWith('/api/')) {
+    return res.status(404).json({ error: 'API endpoint not found' });
+  }
+  res.sendFile(path.join(__dirname, '../client/dist/index.html'));
+});
+
 // Iniciar servidor
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
   console.log(`📍 Frontend: http://localhost:${PORT}`);
   console.log(`📍 API: http://localhost:${PORT}/api`);
+  console.log(`📍 MongoDB: ${process.env.MONGODB_URI ? 'Configured' : 'Not configured'}`);
 });
