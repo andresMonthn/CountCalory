@@ -82,13 +82,43 @@ app.post('/api/summary', async (req, res) => {
 // Servir archivos estáticos del frontend
 app.use(express.static(path.join(__dirname, '../client/dist')));
 
-// Todas las rutas que no sean /api/* deben servir el frontend
+// 3. FINALMENTE: catch-all para SPA (debe ir ÚLTIMO)
 app.get('*', (req, res) => {
-  // Si la ruta empieza con /api, no servir el frontend
   if (req.path.startsWith('/api/')) {
     return res.status(404).json({ error: 'API endpoint not found' });
   }
   res.sendFile(path.join(__dirname, '../client/dist/index.html'));
+});
+
+// Todas las rutas que no sean /api/* deben servir el frontend
+app.get('/api/summary', async (req, res) => {
+  try {
+    console.log('📋 Fetching summaries...');
+    
+    // SI USAS MONGODB:
+    // const summaries = await Summary.find().sort({ createdAt: -1 });
+    // return res.json(summaries);
+
+    // TEMPORAL: Devuelve un ARRAY vacío o con datos de ejemplo
+    res.json([]); // ← Esto devuelve un array vacío
+    
+    // O con datos de ejemplo:
+    // res.json([
+    //   {
+    //     _id: "1",
+    //     budget: 2000,
+    //     consumed: 500,
+    //     exercise: 300,
+    //     remaining: 1800,
+    //     status: "Deficit",
+    //     createdAt: new Date().toISOString()
+    //   }
+    // ]);
+    
+  } catch (error) {
+    console.error('❌ Error fetching summaries:', error);
+    res.status(500).json({ error: 'Error fetching data' });
+  }
 });
 
 // Iniciar servidor
