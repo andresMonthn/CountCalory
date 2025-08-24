@@ -49,8 +49,10 @@ const exerciseOptions = [
   { name: "Pesas 1hra", calories: 540 },
 ];
 
-const API_BASE_URL = "https://countcalory.onrender.com";
-const API_SUMMARY = `${API_BASE_URL}/api/summary`;
+
+
+const API_SUMMARY = import.meta.env.VITE_API_SUMMARY;
+
 
 export default function CalorieCounter() {
   const [budget, setBudget] = useState(2000);
@@ -160,17 +162,20 @@ export default function CalorieCounter() {
   }, []);
 
   return (
-    <div className='Scrilles'>
-      <div className="CalorieCounter">
-        <h1 className="text-2xl font-bold mb-4">Contador de Calorías</h1>
+    <>
+    <div>
+      
+      <div className="CalorieCounter-header">
+        <h1 className="text-2xl mb-4">Contador de Calorías</h1>
         <img src="image.png" alt="CountCalory Logo" className="w-24 mb-4"/>
-        
+      </div>
+      <div className="CalorieCounter">
         <label>Presupuesto diario:</label>
         <input
           type="number"
           value={budget}
           onChange={(e) => setBudget(Number(e.target.value))}
-          className="border p-1 w-full mb-4"
+          className=""
         />
 
         {/* Selección de comidas */}
@@ -187,7 +192,7 @@ export default function CalorieCounter() {
               </option>
             ))}
           </select>
-          <button onClick={addFood} className="bg-blue-500 text-white px-3 py-1 rounded">
+          <button onClick={addFood} className="bg-blue-500 text-white px-3 py-1 rounded agregarcomida">
             Agregar comida
           </button>
 
@@ -196,7 +201,7 @@ export default function CalorieCounter() {
               {foodList.map((f, i) => (
                 <li key={i} className="flex justify-between items-center bg-gray-200 p-1 my-1 rounded">
                   {f.name} ({f.calories} Cal)
-                  <button onClick={() => removeFood(i)} className="text-red-500 ml-2">Eliminar</button>
+                  <button onClick={() => removeFood(i)} className="text-red-500 ml-2 eliminarcomida">Eliminar</button>
                 </li>
               ))}
             </ul>
@@ -204,10 +209,10 @@ export default function CalorieCounter() {
         </div>
 
         {/* Selección de ejercicios */}
-        <div className="mb-4 controls">
+        <div className="ejercicio">
           <label>Ejercicio:</label>
           <select
-            className="border p-1 w-full mb-2"
+            className=""
             value={JSON.stringify(selectedExercise)}
             onChange={(e) => setSelectedExercise(JSON.parse(e.target.value))}
           >
@@ -217,7 +222,7 @@ export default function CalorieCounter() {
               </option>
             ))}
           </select>
-          <button onClick={addExercise} className="bg-green-500 text-white px-3 py-1 rounded">
+          <button onClick={addExercise} className="bg-green-500 text-white px-3 py-1 rounded agregarejercicio">
             Agregar ejercicio
           </button>
 
@@ -226,7 +231,7 @@ export default function CalorieCounter() {
               {exerciseList.map((e, i) => (
                 <li key={i} className="flex justify-between items-center bg-gray-200 p-1 my-1 rounded">
                   {e.name} ({e.calories} Cal)
-                  <button onClick={() => removeExercise(i)} className="text-red-500 ml-2">Eliminar</button>
+                  <button onClick={() => removeExercise(i)} className="text-red-500 ml-2 eliminarejercicio">Eliminar</button>
                 </li>
               ))}
             </ul>
@@ -235,7 +240,7 @@ export default function CalorieCounter() {
 
         <button
           onClick={calculate}
-          className="bg-gray-700 text-white px-3 py-1 rounded mb-4"
+          className="calcular"
         >
           Calcular resumen
         </button>
@@ -250,20 +255,21 @@ export default function CalorieCounter() {
             <button
               onClick={saveSummary}
               disabled={loading}
-              className="mt-2 bg-purple-500 text-white px-3 py-1 rounded disabled:bg-gray-400"
+              className="mt-2 bg-purple-500 text-white px-3 py-1 rounded disabled:bg-gray-400 guardar"
             >
               {loading ? 'Guardando...' : 'Guardar Resumen'}
             </button>
           </div>
         )}
 
-        <div className="mt-6">
+        <details className="detalles">
+        <div className='historial'>
           <h2 className="text-xl font-bold mb-4">Historial de Resúmenes</h2>
           {history.length === 0 ? (
             <p>No hay resúmenes guardados.</p>
           ) : (
             history.map((s, index) => (
-              <div key={index} className="p-4 border rounded mb-2 bg-gray-50">
+              <div key={index} className="p-4 border rounded mb-2 bg-gray-50 historial">
                 <p><strong>{s.remaining}</strong> calorías {s.status}</p>
                 <hr className="my-1" />
                 <p>Presupuesto: {s.budget}</p>
@@ -275,9 +281,31 @@ export default function CalorieCounter() {
               </div>
             ))
           )}
-        </div>
+        </div></details>
       </div>
-      <div><p>Pagina generada por Oscar Andres CL.. en contruccion,</p></div>
+      
     </div>
+
+       <footer className="footer">
+      <div className="footer-column">
+        <h2 className="footer-title">CountCalory</h2>
+        <p>Tu asistente para calcular y gestionar calorías fácilmente.</p>
+      </div>
+
+      <div className="footer-column">
+        <h3>Contacto</h3>
+        <p>
+          <a href="mailto:andre.777.monthana@gmail.com">
+            andres.777.monthana@gmail.com
+          </a>
+        </p>
+      </div>
+
+      <div className="footer-column">
+        <h3>Información</h3>
+        <p>Versión 1.01</p>
+      </div>
+    </footer>
+    </>
   );
 }

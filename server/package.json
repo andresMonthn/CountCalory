@@ -4,15 +4,16 @@
   "type": "module",
   "main": "server.js",
   "scripts": {
+    "dev": "nodemon server.local.js",
     "start": "node server.js",
     "postinstall": "cd ../client && npm install && npm run build"
   },
   "dependencies": {
-    "cors": "^2.8.5"    ,
+    "cors": "^2.8.5",
     "express": "^4.19.2",
     "mongoose": "^8.3.4"
   },
   "devDependencies": {
-    "nodemon": "^3.1.0"
+    "nodemon": "^3.1.10"
   }
 }
