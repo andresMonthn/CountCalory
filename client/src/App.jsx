@@ -51,7 +51,7 @@ const exerciseOptions = [
 
 
 
-const API_SUMMARY = import.meta.env.VITE_API_SUMMARY;
+
 
 
 export default function CalorieCounter() {
@@ -89,6 +89,9 @@ export default function CalorieCounter() {
       status: remaining < 0 ? "Surplus" : "Deficit",
     });
   };
+
+
+  const API_SUMMARY = import.meta.env.VITE_API_URL + '/summary';
 
   // Guardar resumen en backend
   const saveSummary = async () => {
@@ -161,6 +164,13 @@ export default function CalorieCounter() {
     fetchHistory();
   }, []);
 
+
+  function limpiar() { 
+    setFoodList([]);
+    setExerciseList([]);
+    setOutput(null);
+    setBudget(2000);
+  }
   return (
     <>
     <div>
@@ -243,6 +253,12 @@ export default function CalorieCounter() {
           className="calcular"
         >
           Calcular resumen
+          </button>
+           <button
+          onClick={limpiar}
+          className="calcular"
+        >
+          Limpiar
         </button>
 
         {output && (
@@ -262,9 +278,9 @@ export default function CalorieCounter() {
           </div>
         )}
 
-        <details className="detalles">
-        <div className='historial'>
-          <h2 className="text-xl font-bold mb-4">Historial de Resúmenes</h2>
+        <details className="detalles"> <h2 className="text-xl font-bold mb-4">Historial de Resúmenes</h2>
+        <div>
+         
           {history.length === 0 ? (
             <p>No hay resúmenes guardados.</p>
           ) : (

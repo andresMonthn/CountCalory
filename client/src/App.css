@@ -112,11 +112,12 @@ button {
  .ejercicio{
   margin-top: 20px;
   padding: 5px;
+  
  }
 
  .detalles {
   margin-top: 20px;
-  padding: 5px;
+  
  }
 
  .historial {
@@ -125,8 +126,13 @@ button {
   background-color: var(--primary-700);
   border-radius: var(--radius);
   display: flex;
-  flex-direction: column;
-  gap: 8px;
+  flex-direction: row;
+  height: 100px;
+  width: 500px;
+  box-sizing: content-box;
+  font-size: .9em !important;
+  border: 1px solid var(--border);
+  
  }
 
 button:hover { filter: brightness(1.08); }
