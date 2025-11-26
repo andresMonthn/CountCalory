@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "nodemon server.local.js",
     "start": "node server.js",
-    "postinstall": "cd ../client && npm install && npm run build"
+    "postinstall": "cd ../client && npm install && npm run build",
+    "seed:foods": "node seed/seedFoods.js"
   },
   "dependencies": {
     "cors": "^2.8.5",

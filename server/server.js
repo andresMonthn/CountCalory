@@ -11,6 +11,7 @@ import { fileURLToPath } from 'url'; // Necesario para obtener __dirname en ES M
 // 📌 Importar rutas personalizadas
 // -------------------------------
 import summaryRoutes from './routes/summaryRoutes.js';
+import foodsRoutes from './routes/foods.js';
 
 // -------------------------------
 // 📌 Manejo de __dirname en ESModules
@@ -107,6 +108,7 @@ app.get('/api/test', (req, res) => {
 // 📌 Rutas API de la aplicación
 // -------------------------------
 app.use('/api/summary', summaryRoutes);
+app.use('/api/foods', foodsRoutes);
 
 // -------------------------------
 // 📌 Servir frontend de React (Build)

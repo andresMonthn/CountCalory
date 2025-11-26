@@ -8,6 +8,7 @@ import mongoose from 'mongoose';
 
 // Importar rutas
 import summaryRoutes from './routes/summaryRoutes.js';
+import foodsRoutes from './routes/foods.js';
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -69,6 +70,8 @@ app.get('/api/test', (req, res) => {
 
 // ✅ Rutas de summary
 app.use('/api/summary', summaryRoutes);
+// ✅ Rutas de alimentos (búsqueda local)
+app.use('/api/foods', foodsRoutes);
 
 // =========================
 // 🚨 MANEJO GLOBAL DE ERRORES

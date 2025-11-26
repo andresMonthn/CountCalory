@@ -1,44 +1,21 @@
-import './App.css'
+import '@/styles/app.css'
 import { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { Header } from "@/components/Header";
+import { Footer } from "@/components/Footer";
+import { ProfilePanel } from "@/components/ProfilePanel";
+import { FoodSection } from "@/components/FoodSection";
+import { ExerciseSection } from "@/components/ExerciseSection";
+import { SummaryPanel } from "@/components/SummaryPanel";
+import { HistoryPanel } from "@/components/HistoryPanel";
+import { MacroTable } from "@/components/MacroTable";
+import { computeBudget } from "@/utils/budget";
+import { useOnline } from "@/hooks/useOnline";
+import { useHistoryPolling } from "@/hooks/useHistoryPolling";
+import { saveSummaryData } from "@/services/summaryService";
+import { generateBalancedPlan } from "@/services/planService";
+import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction } from "@/components/ui/alert-dialog";
 
-const foodOptions = [
-  { name: "Huevos (2 piezas)", calories: 140 },
-  { name: "Pan integral (2 rebanadas)", calories: 120 },
-  { name: "Avena (1 taza cocida)", calories: 150 },
-  { name: "Leche descremada (1 taza)", calories: 90 },
-  { name: "Yogur natural (1 taza)", calories: 100 },
-  { name: "Banana (1 mediana)", calories: 105 },
-  { name: "Manzana (1 mediana)", calories: 95 },
-  { name: "Naranja (1 mediana)", calories: 60 },
-  { name: "Fresas (1 taza)", calories: 50 },
-  { name: "Arroz blanco (1 taza cocido)", calories: 200 },
-  { name: "Pasta cocida (1 taza)", calories: 220 },
-  { name: "Pollo a la plancha (100g)", calories: 165 },
-  { name: "Carne de res magra (100g)", calories: 250 },
-  { name: "Pescado (100g)", calories: 180 },
-  { name: "Tofu (100g)", calories: 80 },
-  { name: "Aguacate (1 mediano)", calories: 240 },
-  { name: "Queso cheddar (30g)", calories: 120 },
-  { name: "Almendras (30g)", calories: 170 },
-  { name: "Nueces (30g)", calories: 200 },
-  { name: "Cacahuates (30g)", calories: 170 },
-  { name: "Aceite de oliva (1 cucharada)", calories: 120 },
-  { name: "Mantequilla (1 cucharada)", calories: 100 },
-  { name: "Sopa de verduras (1 taza)", calories: 80 },
-  { name: "Ensalada con aderezo ligero", calories: 150 },
-  { name: "Papas al horno (1 mediana)", calories: 160 },
-  { name: "Camote (1 mediano)", calories: 130 },
-  { name: "Zanahoria (1 mediana)", calories: 25 },
-  { name: "Brócoli (1 taza cocido)", calories: 55 },
-  { name: "Espinaca (1 taza cocida)", calories: 40 },
-  { name: "Galletas integrales (2 piezas)", calories: 70 },
-  { name: "Chocolate negro (30g)", calories: 170 },
-  { name: "Helado (1/2 taza)", calories: 140 },
-  { name: "Refresco (1 lata)", calories: 150 },
-  { name: "Agua", calories: 0 },
-  { name: "Café negro", calories: 5 },
-  { name: "Té verde", calories: 5 },
-];
 
 const exerciseOptions = [
   { name: "Caminata ligera 30 min", calories: 100 },
@@ -49,279 +26,154 @@ const exerciseOptions = [
   { name: "Pesas 1hra", calories: 540 },
 ];
 
-
-
-
-
-
-export default function CalorieCounter() {
+export default function App() {
   const [budget, setBudget] = useState(2000);
-  const [selectedFood, setSelectedFood] = useState(foodOptions[0]);
-  const [selectedExercise, setSelectedExercise] = useState(exerciseOptions[0]);
+  const [gender, setGender] = useState("male");
+  const [heightCm, setHeightCm] = useState(170);
+  const [weightKg, setWeightKg] = useState(70);
+  const [ageYears, setAgeYears] = useState(30);
+  const [goal, setGoal] = useState("mantener");
+  const [activity, setActivity] = useState("sedentario");
+  const [mealsCount, setMealsCount] = useState(3);
+  const [alertOpen, setAlertOpen] = useState(false);
+  const [lastPrefs, setLastPrefs] = useState(null);
+  const [selectedExercises, setSelectedExercises] = useState([]);
   const [foodList, setFoodList] = useState([]);
   const [exerciseList, setExerciseList] = useState([]);
   const [output, setOutput] = useState(null);
-  const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(false);
+  const isOnline = useOnline();
+  const { history, refresh } = useHistoryPolling(isOnline);
 
-  // Agregar comida
-  const addFood = () => setFoodList([...foodList, selectedFood]);
-
-  // Agregar ejercicio
-  const addExercise = () => setExerciseList([...exerciseList, selectedExercise]);
-
-  // Eliminar comida por índice
+  const addExercise = () => {
+    const uniques = selectedExercises.filter(sel => !exerciseList.some(e => e.name === sel.name && e.calories === sel.calories));
+    if (uniques.length > 0) {
+      setExerciseList([...exerciseList, ...uniques]);
+    }
+    setSelectedExercises([]);
+  };
   const removeFood = (index) => setFoodList(foodList.filter((_, i) => i !== index));
-
-  // Eliminar ejercicio por índice
   const removeExercise = (index) => setExerciseList(exerciseList.filter((_, i) => i !== index));
 
-  // Calcular resumen
   const calculate = () => {
-    const consumed = foodList.reduce((sum, f) => sum + f.calories, 0);
+    const consumed = foodList.reduce((sum, f) => sum + f.calories * (Number(f.qty || 1)) * (Number(f.grams || 100) / 100), 0);
     const exercise = exerciseList.reduce((sum, e) => sum + e.calories, 0);
     const remaining = budget - consumed + exercise;
-    setOutput({
-      budget,
-      consumed,
-      exercise,
-      remaining,
-      status: remaining < 0 ? "Surplus" : "Deficit",
-    });
+    setOutput({ budget, consumed, exercise, remaining, status: remaining < 0 ? "Surplus" : "Deficit" });
   };
 
-
-  const API_SUMMARY = import.meta.env.VITE_API_URL + '/summary';
-
-  // Guardar resumen en backend
   const saveSummary = async () => {
     if (!output) return;
-    
     setLoading(true);
     try {
-      const res = await fetch(API_SUMMARY, {
-        method: "POST",
-        headers: { 
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          ...output,
-          createdAt: new Date().toISOString()
-        }),
-      });
-
-      if (!res.ok) {
-        const errorData = await res.text();
-        throw new Error(`HTTP ${res.status}: ${errorData}`);
-      }
-
-      const data = await res.json();
-      setHistory(prev => [data, ...prev]);
+      await saveSummaryData({ ...output, createdAt: new Date().toISOString() });
+      await refresh();
       alert("✅ Resumen guardado correctamente");
-      
     } catch (err) {
-      console.error("Error guardando resumen:", err);
       alert("❌ Error al guardar. Verifica la consola para más detalles.");
     } finally {
       setLoading(false);
     }
   };
 
-  // Cargar historial
+  const generatePlan = async (preferences) => {
+    const exerciseTotal = exerciseList.reduce((sum, e) => sum + e.calories, 0);
+    const currentConsumed = 0;
+    const planItems = await generateBalancedPlan({ budget, goal, mealsCount, preferences, exercise: exerciseTotal, currentConsumed });
+    setFoodList(planItems);
+    if (preferences) setLastPrefs(preferences);
+  };
+
   useEffect(() => {
-    const fetchHistory = async () => {
-      try {
-        const res = await fetch(API_SUMMARY, {
-          headers: {
-            'Accept': 'application/json',
-          }
-        });
+    const h = Number.isFinite(heightCm) ? heightCm : 170;
+    const w = Number.isFinite(weightKg) ? weightKg : 70;
+    const a = Number.isFinite(ageYears) ? ageYears : 30;
+    const next = computeBudget(gender, h, w, goal, activity, a);
+    setBudget(Math.round(next));
+  }, [gender, heightCm, weightKg, ageYears, goal, activity]);
 
-        if (!res.ok) {
-          throw new Error(`HTTP error! status: ${res.status}`);
-        }
-
-        const contentType = res.headers.get('content-type');
-        if (!contentType || !contentType.includes('application/json')) {
-          throw new Error('Response is not JSON');
-        }
-
-        const data = await res.json();
-        
-        if (Array.isArray(data)) {
-          setHistory(data);
-        } else {
-          console.warn('⚠️ Expected array but got:', data);
-          setHistory([]);
-        }
-        
-      } catch (err) {
-        console.error("Error cargando historial:", err);
-        setHistory([]);
-      }
-    };
-    
-    fetchHistory();
-  }, []);
-
-
-  function limpiar() { 
+  function limpiar() {
     setFoodList([]);
     setExerciseList([]);
     setOutput(null);
     setBudget(2000);
   }
+
   return (
     <>
-    <div>
-      
-      <div className="CalorieCounter-header">
-        <h1 className="text-2xl mb-4">Contador de Calorías</h1>
-        <img src="image.png" alt="CountCalory Logo" className="w-24 mb-4"/>
-      </div>
-      <div className="CalorieCounter">
-        <label>Presupuesto diario:</label>
-        <input
-          type="number"
-          value={budget}
-          onChange={(e) => setBudget(Number(e.target.value))}
-          className=""
-        />
-
-        {/* Selección de comidas */}
-        <div className="mb-4">
-          <label>Alimento:</label>
-          <select
-            className="border p-1 w-full mb-2"
-            value={JSON.stringify(selectedFood)}
-            onChange={(e) => setSelectedFood(JSON.parse(e.target.value))}
-          >
-            {foodOptions.map((f, i) => (
-              <option key={i} value={JSON.stringify(f)}>
-                {f.name} ({f.calories} Cal)
-              </option>
-            ))}
-          </select>
-          <button onClick={addFood} className="bg-blue-500 text-white px-3 py-1 rounded agregarcomida">
-            Agregar comida
-          </button>
-
-          {foodList.length > 0 && (
-            <ul className="mt-2">
-              {foodList.map((f, i) => (
-                <li key={i} className="flex justify-between items-center bg-gray-200 p-1 my-1 rounded">
-                  {f.name} ({f.calories} Cal)
-                  <button onClick={() => removeFood(i)} className="text-red-500 ml-2 eliminarcomida">Eliminar</button>
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
-
-        {/* Selección de ejercicios */}
-        <div className="ejercicio">
-          <label>Ejercicio:</label>
-          <select
-            className=""
-            value={JSON.stringify(selectedExercise)}
-            onChange={(e) => setSelectedExercise(JSON.parse(e.target.value))}
-          >
-            {exerciseOptions.map((e, i) => (
-              <option key={i} value={JSON.stringify(e)}>
-                {e.name} ({e.calories} Cal)
-              </option>
-            ))}
-          </select>
-          <button onClick={addExercise} className="bg-green-500 text-white px-3 py-1 rounded agregarejercicio">
-            Agregar ejercicio
-          </button>
-
-          {exerciseList.length > 0 && (
-            <ul className="mt-2">
-              {exerciseList.map((e, i) => (
-                <li key={i} className="flex justify-between items-center bg-gray-200 p-1 my-1 rounded">
-                  {e.name} ({e.calories} Cal)
-                  <button onClick={() => removeExercise(i)} className="text-red-500 ml-2 eliminarejercicio">Eliminar</button>
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
-
-        <button
-          onClick={calculate}
-          className="calcular"
-        >
-          Calcular resumen
-          </button>
-           <button
-          onClick={limpiar}
-          className="calcular"
-        >
-          Limpiar
-        </button>
-
-        {output && (
-          <div className="mt-4 p-4 border rounded bg-gray-100">
-            <p><strong>{output.remaining}</strong> calorías {output.status}</p>
-            <hr className="my-2" />
-            <p>Presupuesto: {output.budget}</p>
-            <p>Consumidas: {output.consumed}</p>
-            <p>Ejercicio: {output.exercise}</p>
-            <button
-              onClick={saveSummary}
-              disabled={loading}
-              className="mt-2 bg-purple-500 text-white px-3 py-1 rounded disabled:bg-gray-400 guardar"
-            >
-              {loading ? 'Guardando...' : 'Guardar Resumen'}
-            </button>
+      <div className="max-w-[1024px] mx-auto px-3 sm:px-4">
+        <Header />
+        <div className="CalorieCounter">
+          <ProfilePanel
+            gender={gender}
+            setGender={setGender}
+            heightCm={heightCm}
+            setHeightCm={setHeightCm}
+            weightKg={weightKg}
+            setWeightKg={setWeightKg}
+            ageYears={ageYears}
+            setAgeYears={setAgeYears}
+            activity={activity}
+            setActivity={setActivity}
+            goal={goal}
+            setGoal={setGoal}
+            budget={budget}
+            onGeneratePlan={generatePlan}
+            mealsCount={mealsCount}
+            setMealsCount={setMealsCount}
+          />
+          <div className="flex items-center justify-center w-full">
+            <FoodSection
+              foodList={foodList}
+              onAdd={(food) => setFoodList([...foodList, { ...food, qty: 1, grams: 100 }])}
+              removeFood={removeFood}
+            />
           </div>
-        )}
-
-        <details className="detalles"> <h2 className="text-xl font-bold mb-4">Historial de Resúmenes</h2>
-        <div>
-         
-          {history.length === 0 ? (
-            <p>No hay resúmenes guardados.</p>
-          ) : (
-            history.map((s, index) => (
-              <div key={index} className="p-4 border rounded mb-2 bg-gray-50 historial">
-                <p><strong>{s.remaining}</strong> calorías {s.status}</p>
-                <hr className="my-1" />
-                <p>Presupuesto: {s.budget}</p>
-                <p>Consumidas: {s.consumed}</p>
-                <p>Ejercicio: {s.exercise}</p>
-                <p className="text-sm text-gray-500 mt-1">
-                  Guardado: {new Date(s.timestamp || s.createdAt || Date.now()).toLocaleString()}
-                </p>
-              </div>
-            ))
+          {foodList.length > 0 && (
+            <div className="flex items-center justify-center w-full">
+              <MacroTable
+                foods={foodList}
+                onQtyChange={(index, nextQty) => {
+                  const next = foodList.map((f, i) => i === index ? { ...f, qty: nextQty } : f);
+                  setFoodList(next);
+                }}
+                onGramsChange={(index, nextGrams) => {
+                  const next = foodList.map((f, i) => i === index ? { ...f, grams: nextGrams } : f);
+                  setFoodList(next);
+                }}
+                onReachEnd={() => setAlertOpen(true)}
+              />
+            </div>
           )}
-        </div></details>
+          <ExerciseSection
+            exerciseOptions={exerciseOptions}
+            selectedExercises={selectedExercises}
+            setSelectedExercises={setSelectedExercises}
+            addExercise={addExercise}
+            exerciseList={exerciseList}
+            removeExercise={removeExercise}
+          />
+          <Button onClick={calculate} className="calcular">Calcular resumen</Button>
+          <Button onClick={limpiar} className="calcular" variant="secondary">Limpiar</Button>
+          <SummaryPanel output={output} loading={loading} onSave={saveSummary} />
+          <HistoryPanel history={history} />
+        </div>
       </div>
-      
-    </div>
-
-       <footer className="footer">
-      <div className="footer-column">
-        <h2 className="footer-title">CountCalory</h2>
-        <p>Tu asistente para calcular y gestionar calorías fácilmente.</p>
-      </div>
-
-      <div className="footer-column">
-        <h3>Contacto</h3>
-        <p>
-          <a href="mailto:andre.777.monthana@gmail.com">
-            andres.777.monthana@gmail.com
-          </a>
-        </p>
-      </div>
-
-      <div className="footer-column">
-        <h3>Información</h3>
-        <p>Versión 1.01</p>
-      </div>
-    </footer>
+      <Footer />
+      <AlertDialog open={alertOpen} onOpenChange={setAlertOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>¿Generar un nuevo plan?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Has llegado al final de la tabla. ¿Quieres crear otro plan con tus preferencias actuales?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setAlertOpen(false)}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={() => { setAlertOpen(false); generatePlan(lastPrefs); }}>Generar</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 }
