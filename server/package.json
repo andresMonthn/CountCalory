@@ -10,7 +10,9 @@
     "seed:foods": "node seed/seedFoods.js"
   },
   "dependencies": {
+    "body-parser": "^2.2.1",
     "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
     "express": "^4.19.2",
     "mongoose": "^8.3.4"
   },

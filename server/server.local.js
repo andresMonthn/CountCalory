@@ -2,6 +2,7 @@
 // 🚀 Servidor Express para ENTORNO DE DESARROLLO (LOCAL)
 
 // Importaciones principales
+import 'dotenv/config';
 import cors from 'cors';
 import express from 'express';
 import mongoose from 'mongoose';

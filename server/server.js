@@ -1,6 +1,7 @@
 // -------------------------------
 // 📌 Importar dependencias
 // -------------------------------
+import 'dotenv/config';          // Cargar variables de entorno al inicio
 import cors from 'cors';             // Middleware para permitir peticiones desde otros dominios (CORS)
 import express from 'express';       // Framework web para Node.js
 import mongoose from 'mongoose';     // ODM para MongoDB

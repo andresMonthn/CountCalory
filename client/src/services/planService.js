@@ -41,10 +41,12 @@ async function fetchFoodsFromApi(terms, limit = 50) {
   const seen = new Set();
   for (const t of terms) {
     try {
-      const api = import.meta.env.VITE_API_URL + `/foods/search?q=${encodeURIComponent(t)}&limit=${limit}`;
-      const res = await fetch(api, { headers: { 'Accept': 'application/json' } });
-      if (!res.ok) continue;
-      const data = await res.json();
+      const api = import.meta.env.VITE_API_URL + `/foods/search`;
+      const res = await axios.get(api, {
+        params: { q: t, limit },
+        headers: { 'Accept': 'application/json' }
+      });
+      const data = res.data;
       const items = Array.isArray(data.items) ? data.items : [];
       for (const p of items) {
         const key = p._id || p.name;

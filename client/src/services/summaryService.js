@@ -1,27 +1,25 @@
+import axios from 'axios';
+
 const API_SUMMARY = import.meta.env.VITE_API_URL + '/summary';
 
 export async function getSummaryHistory() {
   try {
-    const res = await fetch(API_SUMMARY, { headers: { 'Accept': 'application/json' } });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const contentType = res.headers.get('content-type');
-    if (!contentType || !contentType.includes('application/json')) throw new Error('Response is not JSON');
-    const data = await res.json();
-    return Array.isArray(data) ? data : [];
-  } catch {
+    const res = await axios.get(API_SUMMARY, { headers: { 'Accept': 'application/json' } });
+    return Array.isArray(res.data) ? res.data : [];
+  } catch (error) {
+    console.error("Error fetching summary history:", error);
     return [];
   }
 }
 
 export async function saveSummaryData(payload) {
-  const res = await fetch(API_SUMMARY, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload),
-  });
-  if (!res.ok) {
-    const errorData = await res.text();
-    throw new Error(`HTTP ${res.status}: ${errorData}`);
+  try {
+    const res = await axios.post(API_SUMMARY, payload, {
+      headers: { 'Content-Type': 'application/json' }
+    });
+    return res.data;
+  } catch (error) {
+    const errorData = error.response ? JSON.stringify(error.response.data) : error.message;
+    throw new Error(`HTTP Error: ${errorData}`);
   }
-  return await res.json();
 }
