@@ -10,9 +10,10 @@ import mongoose from 'mongoose';
 // Importar rutas
 import summaryRoutes from './routes/summaryRoutes.js';
 import foodsRoutes from './routes/foods.js';
+import authRoutes from './routes/authRoutes.js';
 
 const app = express();
-const PORT = process.env.PORT || 4000;
+const PORT = process.env.PORT || 4001;
 
 // =========================
 // 🔧 CONFIGURACIONES
@@ -71,6 +72,8 @@ app.get('/api/test', (req, res) => {
 
 // ✅ Rutas de summary
 app.use('/api/summary', summaryRoutes);
+// ✅ Rutas de auth
+app.use('/api/auth', authRoutes);
 // ✅ Rutas de alimentos (búsqueda local)
 app.use('/api/foods', foodsRoutes);
 

@@ -4,8 +4,12 @@ import {
   getSummaries,
   deleteSummaries
 } from "../controllers/summaryController.js";
+import { protect } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
+
+// All routes are protected
+router.use(protect);
 
 // Crear resumen
 router.post("/", createSummary);

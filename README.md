@@ -59,3 +59,46 @@ El script:
 2. Descarga y procesa una tabla de calorías externa.
 3. Genera variaciones de alimentos (cocido, frito, etc.).
 4. Inserta los datos en la colección `foods`.
+
+## Versión Móvil (React Native)
+
+Este proyecto incluye una versión móvil nativa desarrollada con React Native y Expo en la carpeta `mobile/`.
+
+### Requisitos
+- Node.js
+- Dispositivo Android/iOS o Emulador
+- Expo Go (App en tu celular)
+
+### Ejecución
+1. Ve a la carpeta `mobile`:
+   ```bash
+   cd mobile
+   ```
+2. Instala dependencias (si es la primera vez):
+   ```bash
+   npm install
+   ```
+3. Inicia el servidor de desarrollo:
+   ```bash
+   npx expo start
+   ```
+4. Escanea el código QR con Expo Go (Android) o la cámara (iOS).
+
+### Estructura
+- `src/components`: Componentes reutilizables (Header, etc.)
+- `src/screens`: Pantallas principales (HomeScreen, etc.)
+- `src/config`: Configuraciones (API URL)
+
+## Generar APK (Android)
+
+Para exportar la aplicación móvil como un archivo `.apk` instalable, sigue las instrucciones detalladas en:
+
+[📄 mobile/SETUP_APK.md](./mobile/SETUP_APK.md)
+
+Resumen rápido:
+1. `cd mobile`
+2. `npm install -g eas-cli`
+3. `eas login`
+4. `eas build -p android --profile preview`
+
+

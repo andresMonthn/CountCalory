@@ -41,9 +41,9 @@ export const getSummaries = async (req, res) => {
 // Eliminar historial
 export const deleteSummaries = async (req, res) => {
   try {
-    await Summary.deleteMany({});
+    await Summary.deleteMany({ userId: req.user._id });
     
-    console.log('🗑️ All summaries deleted');
+    console.log(`🗑️ All summaries deleted for user ${req.user._id}`);
     res.json({ message: "Historial eliminado" });
     
   } catch (err) {

@@ -14,7 +14,7 @@ export function SummaryPanel({ output, loading, onSave }) {
     ? "Optimista: muy cerca del objetivo"
     : (r > 0 ? "Falta muy poco pero vas bien" : "Te has pasado muy poco, ajusta ligeramente");
   return (
-    <div className="mt-4 p-4 border border-slate-700 rounded bg-slate-900 text-slate-200">
+    <div className="mt-4 p-4 rounded bg-slate-900 text-slate-200">
       <div className={"mb-2 p-2 rounded " + bannerClass}>
         <strong>{output.remaining}</strong> calorías · {bannerMsg}
       </div>

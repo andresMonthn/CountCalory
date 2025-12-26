@@ -96,18 +96,10 @@ app.get('/api', (req, res) => {
   });
 });
 
-app.get('/api/test', (req, res) => {
-  res.json({
-    success: true,
-    message: 'CORS is working!',
-    timestamp: new Date().toISOString(),
-    database: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected'
-  });
-});
-
 // -------------------------------
-// 📌 Rutas API de la aplicación
+// 📌 Rutas de la API
 // -------------------------------
+app.use('/api/auth', authRoutes);
 app.use('/api/summary', summaryRoutes);
 app.use('/api/foods', foodsRoutes);
 

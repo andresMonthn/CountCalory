@@ -9,7 +9,7 @@ export function AlertDialog({ open, onOpenChange, children }) {
   if (!open) return null;
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
-      <div className="absolute inset-0 bg-black/50" onClick={() => onOpenChange?.(false)} />
+      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm transition-all duration-200" onClick={() => onOpenChange?.(false)} />
       {children}
     </div>
   );
@@ -21,9 +21,9 @@ export function AlertDialogTrigger({ asChild, children, onClick }) {
   );
 }
 
-export function AlertDialogContent({ children }) {
+export function AlertDialogContent({ children, className = "" }) {
   return (
-    <div className="relative z-50 w-[92%] max-w-[480px] rounded border border-slate-700 bg-slate-900 text-slate-200 p-4 shadow-xl">
+    <div className={`relative z-50 w-[92%] max-w-[480px] rounded border border-slate-700 bg-slate-900 text-slate-200 p-4 shadow-xl ${className}`}>
       {children}
     </div>
   );

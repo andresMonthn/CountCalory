@@ -7,13 +7,13 @@ export function HistoryPanel({ history }) {
           <p>No hay resúmenes guardados.</p>
         ) : (
           history.map((s, index) => (
-            <div key={index} className="p-4 border rounded mb-2 bg-gray-50 historial">
+            <div key={index} className="p-4 border border-slate-700 rounded mb-2 bg-slate-800 text-slate-200 historial">
               <p><strong>{s.remaining}</strong> calorías {s.status}</p>
-              <hr className="my-1" />
+              <hr className="my-1 border-slate-600" />
               <p>Presupuesto: {s.budget}</p>
               <p>Consumidas: {s.consumed}</p>
               <p>Ejercicio: {s.exercise}</p>
-              <p className="text-sm text-gray-500 mt-1">
+              <p className="text-sm text-slate-400 mt-1">
                 Guardado: {new Date(s.timestamp || s.createdAt || Date.now()).toLocaleString()}
               </p>
             </div>

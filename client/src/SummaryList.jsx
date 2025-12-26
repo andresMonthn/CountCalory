@@ -8,7 +8,8 @@ export default function SummaryList() {
   useEffect(() => {
     const fetchSummaries = async () => {
       try {
-        const res = await fetch("http://localhost:4000/api/summary");
+        const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:4001/api';
+        const res = await fetch(`${apiUrl}/summary`);
         const data = await res.json();
         setSummaries(data);
       } catch (err) {

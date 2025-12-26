@@ -44,7 +44,7 @@ export function ExerciseSection({ exerciseOptions, selectedExercises, setSelecte
       {exerciseList.length > 0 && (
         <ul className="mt-2">
           {exerciseList.map((e, i) => (
-            <li key={`${e.name}-${e.calories}-${i}`} className="flex justify-between items-center bg-slate-900 text-slate-200 p-2 my-1 rounded border border-slate-700">
+            <li key={`${e.name}-${e.calories}-${i}`} className="flex justify-between items-center bg-slate-900 text-slate-200 p-2 my-1 rounded">
               {e.name} ({e.calories} Cal)
               <Button onClick={() => removeExercise(i)} className="ml-2 eliminarejercicio" variant="outline">Eliminar</Button>
             </li>
