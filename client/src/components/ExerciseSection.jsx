@@ -15,8 +15,11 @@ export function ExerciseSection({ exerciseOptions, selectedExercises, setSelecte
             <label
               key={`${opt.name}-${opt.calories}-${i}`}
               className={cn(
-                "flex aspect-square flex-col items-center justify-between text-slate-100 p-2 rounded-xl border border-slate-700 cursor-pointer hover:brightness-110 bg-title-gradient",
-                checked ? "ring-2 ring-sky-300 scale-[1.02]" : ""
+                "group flex h-full min-h-[140px] flex-col items-center justify-between text-slate-100 p-2 rounded-xl border border-slate-700 cursor-pointer bg-title-gradient transition-all duration-300",
+                "hover:border-cyan-400/50 hover:shadow-[0_0_15px_rgba(34,211,238,0.4)] hover:-translate-y-1",
+                checked 
+                  ? "ring-2 ring-cyan-400 shadow-[0_0_20px_rgba(34,211,238,0.6)] scale-[1.02] bg-slate-900/80" 
+                  : "hover:brightness-110"
               )}
             >
               <input
@@ -31,9 +34,20 @@ export function ExerciseSection({ exerciseOptions, selectedExercises, setSelecte
                   }
                 }}
               />
-              <Icon className="w-12 h-12 mx-auto" />
-              <span className="text-white/90 bg-black/20 px-2 py-0.5 rounded text-[11px] sm:text-xs">{opt.calories} Cal</span>
-              <span className="mt-auto truncate-2 text-center px-1 text-[11px] sm:text-xs font-black uppercase tracking-tight">{opt.name}</span>
+              <Icon className={cn(
+                "w-12 h-12 mx-auto transition-all duration-300",
+                checked 
+                  ? "text-cyan-400 drop-shadow-[0_0_10px_rgba(34,211,238,0.8)]" 
+                  : "text-slate-200 group-hover:text-cyan-300 group-hover:drop-shadow-[0_0_5px_rgba(34,211,238,0.5)]"
+              )} />
+              <span className={cn(
+                "text-white/90 bg-black/20 px-2 py-0.5 rounded text-[11px] sm:text-xs transition-colors",
+                checked ? "bg-cyan-950/50 text-cyan-200" : ""
+              )}>{opt.calories} Cal</span>
+              <span className={cn(
+                "mt-auto text-center px-1 text-[11px] sm:text-xs font-black uppercase tracking-tight transition-colors",
+                checked ? "text-cyan-300" : "text-slate-100"
+              )}>{opt.name}</span>
             </label>
           );
         })}

@@ -13,7 +13,7 @@ import foodsRoutes from './routes/foods.js';
 import authRoutes from './routes/authRoutes.js';
 
 const app = express();
-const PORT = process.env.PORT || 4001;
+const PORT = process.env.PORT || 4000;
 
 // =========================
 // 🔧 CONFIGURACIONES
@@ -22,6 +22,13 @@ const PORT = process.env.PORT || 4001;
 // Middleware
 app.use(cors());          // Permite llamadas desde el frontend local (http://localhost:5173, etc.)
 app.use(express.json());  // Permite leer JSON en requests
+
+// Middleware de Logging detallado
+app.use((req, res, next) => {
+  console.log(`📝 [${new Date().toISOString()}] ${req.method} ${req.url}`);
+  console.log('   Origin:', req.headers.origin);
+  next();
+});
 
 // =========================
 // 🔗 CONEXIÓN LOCAL MONGODB

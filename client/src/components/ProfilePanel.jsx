@@ -1,12 +1,94 @@
-import { Mars, Venus, Target, Ruler, Weight, Activity, Calendar, Save } from "lucide-react";
+import { Mars, Venus, Target, Ruler, Weight, Activity, Calendar, Save, RefreshCw } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { SimpleSelect } from "@/components/ui/simple-select";
 import { BudgetDisplay } from "@/components/BudgetDisplay";
+import { useEffect, useState } from "react";
+import { useAuth } from "@/context/AuthContext";
+import { userProfileService } from "@/services/userService";
 
 export function ProfilePanel({ gender, setGender, heightCm, setHeightCm, weightKg, setWeightKg, ageYears, setAgeYears, activity, setActivity, goal, setGoal, budget, mealsCount, setMealsCount, onSaveProfile }) {
+  const { user, updateUser } = useAuth();
+  const [isSyncing, setIsSyncing] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  // Fetch data with persistence logic
+  useEffect(() => {
+    const loadProfileData = async () => {
+      if (!user?._id) return;
+      
+      setLoading(true);
+      try {
+        // 1. Try to load from IndexedDB (Cache)
+        const cachedData = await userProfileService.getProfile(user._id);
+        
+        if (cachedData) {
+          console.log('📦 Applied cached profile data');
+          applyProfileData(cachedData);
+        }
+
+        // 2. Sync with Network (Stale-while-revalidate)
+        setIsSyncing(true);
+        try {
+            const freshData = await userProfileService.fetchFromNetwork();
+            if (freshData) {
+                console.log('☁️ Synced with server data');
+                applyProfileData(freshData);
+                // Update AuthContext to keep it in sync
+                updateUser(freshData);
+            }
+        } catch (netError) {
+            console.warn('Network sync failed, using cached data:', netError);
+        } finally {
+            setIsSyncing(false);
+        }
+
+      } catch (error) {
+        console.error('Error loading profile:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadProfileData();
+  }, [user?._id]);
+
+  const applyProfileData = (data) => {
+    if (data.weight && !isNaN(data.weight)) setWeightKg(data.weight);
+    if (data.height && !isNaN(data.height)) setHeightCm(data.height);
+    if (data.age && !isNaN(data.age)) setAgeYears(data.age);
+    if (data.activityLevel) setActivity(data.activityLevel);
+    // Add other fields if they become persistent
+  };
+
+  const handleSave = async () => {
+      setLoading(true);
+      try {
+          // Prepare data
+          const profileData = {
+              weight: weightKg,
+              height: heightCm,
+              age: ageYears,
+              activityLevel: activity
+          };
+
+          // Use service to update (updates API + IndexedDB)
+          const updatedUser = await userProfileService.updateProfile(profileData);
+          
+          // Update AuthContext
+          updateUser(updatedUser);
+          
+          alert('✅ Perfil guardado y sincronizado');
+      } catch (error) {
+          console.error('Save error:', error);
+          alert('❌ Error al guardar perfil');
+      } finally {
+          setLoading(false);
+      }
+  };
+
   return (
     <Card className="w-full max-w-[1024px] mx-auto bg-slate-950 border-slate-800 shadow-2xl">
       <CardHeader className="pb-4 border-b border-slate-800/50">
@@ -39,8 +121,9 @@ export function ProfilePanel({ gender, setGender, heightCm, setHeightCm, weightK
 
            <div className="flex gap-3 items-center w-full md:w-auto justify-end">
               <BudgetDisplay budget={budget} />
-              <Button onClick={onSaveProfile} size="sm" className="bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg shadow-emerald-900/20 transition-all active:scale-95">
-                  <Save size={16} className="mr-2" /> Guardar
+              <Button onClick={handleSave} disabled={loading} size="sm" className="bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg shadow-emerald-900/20 transition-all active:scale-95">
+                  {loading ? <RefreshCw size={16} className="mr-2 animate-spin" /> : <Save size={16} className="mr-2" />}
+                  {loading ? 'Guardando...' : 'Guardar'}
               </Button>
            </div>
         </div>

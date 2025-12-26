@@ -6,6 +6,7 @@ export const createSummary = async (req, res) => {
     const { budget, consumed, exercise, remaining, status } = req.body;
 
     const newSummary = new Summary({
+      userId: req.user._id,
       budget,
       consumed,
       exercise,
@@ -27,7 +28,7 @@ export const createSummary = async (req, res) => {
 // Obtener historial completo
 export const getSummaries = async (req, res) => {
   try {
-    const summaries = await Summary.find().sort({ createdAt: -1 });
+    const summaries = await Summary.find({ userId: req.user._id }).sort({ createdAt: -1 });
     
     console.log(`📊 Returning ${summaries.length} summaries`);
     res.json(summaries);

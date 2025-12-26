@@ -247,6 +247,31 @@ router.post('/verify', async (req, res) => {
 });
 
 
+// @desc    Get User Profile
+// @route   GET /api/auth/profile
+// @access  Private
+router.get('/profile', protect, async (req, res) => {
+    try {
+        const user = await User.findById(req.user._id).select('+password');
+        if (user) {
+            res.json({
+                _id: user._id,
+                email: user.email,
+                weight: user.weight,
+                height: user.height,
+                age: user.age,
+                activityLevel: user.activityLevel,
+                hasPassword: !!user.password
+            });
+        } else {
+            res.status(404).json({ message: 'Usuario no encontrado' });
+        }
+    } catch (error) {
+        console.error('Error fetching profile:', error);
+        res.status(500).json({ message: 'Error del servidor' });
+    }
+});
+
 // @desc    Update User Profile
 // @route   PUT /api/auth/profile
 // @access  Private

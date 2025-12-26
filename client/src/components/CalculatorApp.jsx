@@ -78,7 +78,7 @@ export default function CalculatorApp() {
 
   const saveProfile = async () => {
     try {
-        const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:4001/api';
+        const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:4000/api';
         const { data } = await axios.put(`${apiUrl}/auth/profile`, {
             weight: weightKg,
             height: heightCm,

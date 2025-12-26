@@ -13,6 +13,7 @@ import { fileURLToPath } from 'url'; // Necesario para obtener __dirname en ES M
 // -------------------------------
 import summaryRoutes from './routes/summaryRoutes.js';
 import foodsRoutes from './routes/foods.js';
+import authRoutes from './routes/authRoutes.js';
 
 // -------------------------------
 // 📌 Manejo de __dirname en ESModules
@@ -34,28 +35,38 @@ const PORT = process.env.PORT || 4000;
 app.use(cors());          // Habilita CORS (en producción se puede restringir a ciertos dominios)
 app.use(express.json());  // Permite recibir JSON en requests
 
+// Middleware de Logging
+app.use((req, res, next) => {
+  console.log(`[${new Date().toISOString()}] ${req.method} ${req.url} from ${req.ip}`);
+  next();
+});
+
 // -------------------------------
-// 📌 Conexión a MongoDB (Atlas en Producción)
+// 📌 Conexión a MongoDB (Auto-detect: Atlas vs Local)
 // -------------------------------
 const connectDB = async () => {
   try {
-    const uri = process.env.MONGODB_URI; 
-    // En desarrollo puedes usar mongodb://127.0.0.1:27017/nombredb
-    // En producción usas mongodb+srv://usuario:password@cluster.mongodb.net/nombredb
+    let uri = process.env.MONGODB_URI || process.env.MONGO_URI;
+    let isLocal = false;
 
     console.log('🔍 Checking MongoDB connection...');
 
     if (!uri) {
-      throw new Error('❌ MONGODB_URI is not defined in environment variables');
+      console.warn('⚠️ MONGODB_URI not found in environment variables.');
+      console.log('🔄 Switching to Local MongoDB...');
+      uri = 'mongodb://127.0.0.1:27017/countcalory';
+      isLocal = true;
     }
 
-    if (!uri.startsWith('mongodb+srv://')) {
-      // Esto fuerza a usar un cluster de Atlas. 
-      // Si quieres permitir local, quita esta validación.
-      throw new Error('❌ Invalid MongoDB URI format. Must start with mongodb+srv://');
+    if (uri.includes('mongodb+srv://')) {
+      console.log('☁️ Target: MongoDB Atlas (Production/Cloud)');
+    } else if (isLocal || uri.includes('localhost') || uri.includes('127.0.0.1')) {
+      console.log('🏠 Target: Local MongoDB (Development)');
+    } else {
+      console.log('🔗 Target: Custom MongoDB URI');
     }
 
-    console.log('🔗 Connecting to MongoDB Atlas...');
+    console.log('🔗 Connecting...');
     
     const conn = await mongoose.connect(uri, {
       serverSelectionTimeoutMS: 5000, // tiempo de espera si no conecta
@@ -63,17 +74,16 @@ const connectDB = async () => {
     });
     
     console.log(`✅ MongoDB Connected to: ${conn.connection.name}`);
-    console.log(`📍 Database: ${conn.connection.db.databaseName}`);
     console.log(`📍 Host: ${conn.connection.host}`);
     
     return conn;
     
   } catch (error) {
     console.error('❌ MongoDB Connection Error:', error.message);
-    console.log('💡 Please check:');
-    console.log('1. ✅ MONGODB_URI environment variable');
-    console.log('2. ✅ MongoDB Atlas user credentials');
-    console.log('3. ✅ Network access in MongoDB Atlas');
+    console.log('💡 Troubleshooting:');
+    console.log('1. If using Atlas, check your IP Whitelist in MongoDB Atlas.');
+    console.log('2. If using Local, ensure mongod service is running.');
+    console.log('3. Check credentials in .env file.');
     process.exit(1); // 🔴 Cierra el servidor si falla la conexión
   }
 };

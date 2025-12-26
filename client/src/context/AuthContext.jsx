@@ -25,19 +25,30 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (email) => {
     try {
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:4001/api';
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:4000/api';
+      console.log(`📧 Enviando Magic Link a: ${apiUrl}/auth/login`);
+      
       await axios.post(`${apiUrl}/auth/login`, { email });
       return { success: true };
     } catch (error) {
-      console.error('Login error:', error);
+      console.error('❌ Error en Magic Link:', error);
+      
+      if (error.code === 'ERR_NETWORK') {
+         return { success: false, error: 'No se pudo conectar con el servidor. Verifique su conexión.' };
+      }
+
       return { success: false, error: error.response?.data?.message || 'Error sending login link' };
     }
   };
 
   const loginWithPassword = async (email, password) => {
     try {
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:4001/api';
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:4000/api';
+      console.log(`🚀 Intentando login en: ${apiUrl}/auth/login-password`);
+      
       const { data } = await axios.post(`${apiUrl}/auth/login-password`, { email, password });
+      
+      console.log('✅ Login exitoso, recibiendo token...');
       
       // 1. Set Auth Header
       axios.defaults.headers.common['Authorization'] = `Bearer ${data.token}`;
@@ -51,7 +62,13 @@ export const AuthProvider = ({ children }) => {
       
       return { success: true };
     } catch (error) {
-      console.error('Login password error:', error);
+      console.error('❌ Error en Login:', error);
+      
+      if (error.code === 'ERR_NETWORK') {
+        console.error('⚠️ Error de red: No se pudo conectar con el backend. Verifique que el servidor esté corriendo en el puerto correcto.');
+        return { success: false, error: 'No se pudo conectar con el servidor. Verifique su conexión.' };
+      }
+      
       return { success: false, error: error.response?.data?.message || 'Error al iniciar sesión' };
     }
   };
@@ -59,7 +76,7 @@ export const AuthProvider = ({ children }) => {
   const verifyToken = async (email, token) => {
     try {
       console.log('🔐 Verifying token for:', email);
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:4001/api';
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:4000/api';
       const { data } = await axios.post(`${apiUrl}/auth/verify`, { email, token });
       
       console.log('✅ Token verified, user data received:', data);
@@ -96,7 +113,7 @@ export const AuthProvider = ({ children }) => {
 
   const updatePassword = async (password) => {
     try {
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:4001/api';
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:4000/api';
       const { data } = await axios.put(`${apiUrl}/auth/update-password`, { password });
       // Update local user state
       const updatedUser = { ...user, hasPassword: true };
