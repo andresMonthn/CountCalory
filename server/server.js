@@ -102,7 +102,8 @@ app.get('/api', (req, res) => {
     database: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected',
     endpoints: {
       test: '/api/test',
-      summary: '/api/summary'
+      summary: '/api/summary',
+      auth: '/api/auth'
     }
   });
 });

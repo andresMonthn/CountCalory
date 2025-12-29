@@ -1,0 +1,204 @@
+2025-12-29T20:33:03.749704053Z To address all issues (including breaking changes), run:
+2025-12-29T20:33:03.749708073Z   npm audit fix --force
+2025-12-29T20:33:03.749710923Z 
+2025-12-29T20:33:03.749714793Z Run `npm audit` for details.
+2025-12-29T20:33:03.970993546Z 
+2025-12-29T20:33:03.971023516Z > client@1.0.0 build
+2025-12-29T20:33:03.971026786Z > vite build
+2025-12-29T20:33:03.971029006Z 
+2025-12-29T20:33:04.269188894Z vite v7.1.3 building for production...
+2025-12-29T20:33:04.332281054Z transforming...
+2025-12-29T20:33:07.321975801Z ✓ 2240 modules transformed.
+2025-12-29T20:33:08.095989413Z rendering chunks...
+2025-12-29T20:33:08.103963286Z computing gzip size...
+2025-12-29T20:33:08.120111484Z dist/index.html                   0.74 kB │ gzip:   0.40 kB
+2025-12-29T20:33:08.120120884Z dist/assets/index-B2XbyAta.css   50.55 kB │ gzip:   9.16 kB
+2025-12-29T20:33:08.120262946Z dist/assets/index-Ckmf3Jtp.js   554.22 kB │ gzip: 180.73 kB
+2025-12-29T20:33:08.120426068Z 
+2025-12-29T20:33:08.120433488Z (!) Some chunks are larger than 500 kB after minification. Consider:
+2025-12-29T20:33:08.120436198Z - Using dynamic import() to code-split the application
+2025-12-29T20:33:08.120438668Z - Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+2025-12-29T20:33:08.120440448Z - Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+2025-12-29T20:33:08.120709952Z ✓ built in 3.82s
+2025-12-29T20:33:08.219935822Z 
+2025-12-29T20:33:08.219961153Z added 29 packages, removed 2 packages, changed 4 packages, and audited 150 packages in 16s
+2025-12-29T20:33:08.219974203Z 
+2025-12-29T20:33:08.220009813Z 25 packages are looking for funding
+2025-12-29T20:33:08.220015524Z   run `npm fund` for details
+2025-12-29T20:33:08.220948397Z 
+2025-12-29T20:33:08.220957607Z found 0 vulnerabilities
+2025-12-29T20:33:10.346972397Z 
+2025-12-29T20:33:10.346996027Z up to date, audited 1509 packages in 2s
+2025-12-29T20:33:10.347024518Z 
+2025-12-29T20:33:10.347029958Z 296 packages are looking for funding
+2025-12-29T20:33:10.347045288Z   run `npm fund` for details
+2025-12-29T20:33:10.358708243Z 
+2025-12-29T20:33:10.358722293Z 12 vulnerabilities (5 moderate, 7 high)
+2025-12-29T20:33:10.358725043Z 
+2025-12-29T20:33:10.358727973Z To address issues that do not require attention, run:
+2025-12-29T20:33:10.358730263Z   npm audit fix
+2025-12-29T20:33:10.358732303Z 
+2025-12-29T20:33:10.358734443Z To address all issues (including breaking changes), run:
+2025-12-29T20:33:10.358737383Z   npm audit fix --force
+2025-12-29T20:33:10.358739393Z 
+2025-12-29T20:33:10.358742133Z Run `npm audit` for details.
+2025-12-29T20:33:10.467823062Z 
+2025-12-29T20:33:10.467843872Z > client@1.0.0 build
+2025-12-29T20:33:10.467846302Z > vite build
+2025-12-29T20:33:10.467847922Z 
+2025-12-29T20:33:10.71856689Z vite v7.1.3 building for production...
+2025-12-29T20:33:10.765765396Z transforming...
+2025-12-29T20:33:14.110152808Z ✓ 2240 modules transformed.
+2025-12-29T20:33:14.439929922Z rendering chunks...
+2025-12-29T20:33:14.448031376Z computing gzip size...
+2025-12-29T20:33:14.464451918Z dist/index.html                   0.74 kB │ gzip:   0.40 kB
+2025-12-29T20:33:14.464467938Z dist/assets/index-B2XbyAta.css   50.55 kB │ gzip:   9.16 kB
+2025-12-29T20:33:14.464549499Z dist/assets/index-Ckmf3Jtp.js   554.22 kB │ gzip: 180.73 kB
+2025-12-29T20:33:14.464780232Z 
+2025-12-29T20:33:14.464791193Z (!) Some chunks are larger than 500 kB after minification. Consider:
+2025-12-29T20:33:14.464796883Z - Using dynamic import() to code-split the application
+2025-12-29T20:33:14.464802613Z - Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+2025-12-29T20:33:14.464807163Z - Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+2025-12-29T20:33:14.465142718Z ✓ built in 3.73s
+2025-12-29T20:33:15.365047456Z ==> Uploading build...
+2025-12-29T20:33:26.134664454Z ==> Uploaded in 5.5s. Compression took 5.3s
+2025-12-29T20:33:26.172554079Z ==> Build successful 🎉
+2025-12-29T20:35:02.512614178Z ==> Deploying...
+2025-12-29T20:35:51.411920039Z ==> Running 'npm start'
+2025-12-29T20:35:52.410606727Z 
+2025-12-29T20:35:52.410638488Z > countcalory-server@1.0.0 start
+2025-12-29T20:35:52.410642718Z > node server.js
+2025-12-29T20:35:52.410645408Z 
+2025-12-29T20:35:56.40867464Z 🔍 Environment Detection: PRODUCTION
+2025-12-29T20:35:56.408863655Z ☁️ Mode: PRODUCTION -> Usando MongoDB Atlas
+2025-12-29T20:35:56.408904276Z 🔗 Target URI: mongodb+srv://andres777monthana:****@cluster0.d7j9y2u.mongodb.net/countcalory?retryWrites=true&w=majority&appName=Cluster0
+2025-12-29T20:35:56.408911886Z 
+2025-12-29T20:35:56.408914166Z 
+2025-12-29T20:35:56.408961178Z 🔗 Connecting...
+2025-12-29T20:35:56.512924534Z 🚀 Server running on port 10000
+2025-12-29T20:35:56.512992996Z 🌍 Network Access: http://<YOUR_IP>:10000
+2025-12-29T20:35:56.513103739Z 🔧 Environment: production
+2025-12-29T20:35:56.513109299Z 📍 Frontend: http://localhost:10000
+2025-12-29T20:35:56.513116499Z 📍 API: http://localhost:10000/api
+2025-12-29T20:35:56.513474408Z 📍 MongoDB State: 2
+2025-12-29T20:35:56.513485638Z 📊 Available endpoints:
+2025-12-29T20:35:56.513499998Z    GET  /api              - API status
+2025-12-29T20:35:56.513502768Z    GET  /api/test         - Test endpoint
+2025-12-29T20:35:56.513534149Z    GET  /api/summary      - Get all summaries
+2025-12-29T20:35:56.513537599Z    POST /api/summary      - Create new summary
+2025-12-29T20:35:57.140458746Z [2025-12-29T20:35:57.070Z] HEAD / from 127.0.0.1
+2025-12-29T20:35:57.798995444Z 💡 Troubleshooting:
+2025-12-29T20:35:57.799011635Z ❌ MongoDB Connection Error: bad auth : authentication failed
+2025-12-29T20:35:57.799028735Z 1. Check NODE_ENV in your environment variables.
+2025-12-29T20:35:57.799034375Z 2. If production, ensure MONGO_URI is set.
+2025-12-29T20:35:57.799052706Z 3. If development, ensure local mongod is running.
+2025-12-29T20:35:59.310843089Z ==> Exited with status 1
+2025-12-29T20:35:59.457335045Z ==> Common ways to troubleshoot your deploy: https://render.com/docs/troubleshooting-deploys
+2025-12-29T20:36:05.243244604Z ==> Running 'npm start'
+2025-12-29T20:36:06.148591535Z 
+2025-12-29T20:36:06.148618766Z > countcalory-server@1.0.0 start
+2025-12-29T20:36:06.148624566Z > node server.js
+2025-12-29T20:36:06.148627436Z 
+2025-12-29T20:36:10.237074305Z 🔍 Environment Detection: PRODUCTION
+2025-12-29T20:36:10.237419863Z ☁️ Mode: PRODUCTION -> Usando MongoDB Atlas
+2025-12-29T20:36:10.237480045Z 🔗 Target URI: mongodb+srv://andres777monthana:****@cluster0.d7j9y2u.mongodb.net/countcalory?retryWrites=true&w=majority&appName=Cluster0
+2025-12-29T20:36:10.237487795Z 
+2025-12-29T20:36:10.237492415Z 
+2025-12-29T20:36:10.237506616Z 🔗 Connecting...
+2025-12-29T20:36:10.338640903Z 🚀 Server running on port 10000
+2025-12-29T20:36:10.338669814Z 🌍 Network Access: http://<YOUR_IP>:10000
+2025-12-29T20:36:10.338681614Z 🔧 Environment: production
+2025-12-29T20:36:10.338685514Z 📍 Frontend: http://localhost:10000
+2025-12-29T20:36:10.339365921Z 📍 API: http://localhost:10000/api
+2025-12-29T20:36:10.339617967Z 📍 MongoDB State: 2
+2025-12-29T20:36:10.339631107Z 📊 Available endpoints:
+2025-12-29T20:36:10.339638628Z    GET  /api              - API status
+2025-12-29T20:36:10.339674628Z    GET  /api/test         - Test endpoint
+2025-12-29T20:36:10.339683309Z    GET  /api/summary      - Get all summaries
+2025-12-29T20:36:10.339722819Z    POST /api/summary      - Create new summary
+2025-12-29T20:36:11.550162025Z ❌ MongoDB Connection Error: bad auth : authentication failed
+2025-12-29T20:36:11.550184005Z 💡 Troubleshooting:
+2025-12-29T20:36:11.550200986Z 1. Check NODE_ENV in your environment variables.
+2025-12-29T20:36:11.550204275Z 2. If production, ensure MONGO_URI is set.
+2025-12-29T20:36:11.550210926Z 3. If development, ensure local mongod is running.
+2025-12-29T20:36:31.270277251Z ==> Running 'npm start'
+2025-12-29T20:36:32.174565326Z 
+2025-12-29T20:36:32.174593627Z > countcalory-server@1.0.0 start
+2025-12-29T20:36:32.174598027Z > node server.js
+2025-12-29T20:36:32.174600387Z 
+2025-12-29T20:36:36.174211769Z 🔍 Environment Detection: PRODUCTION
+2025-12-29T20:36:36.174360003Z ☁️ Mode: PRODUCTION -> Usando MongoDB Atlas
+2025-12-29T20:36:36.174400454Z 🔗 Target URI: mongodb+srv://andres777monthana:****@cluster0.d7j9y2u.mongodb.net/countcalory?retryWrites=true&w=majority&appName=Cluster0
+2025-12-29T20:36:36.174404784Z 
+2025-12-29T20:36:36.174406974Z 
+2025-12-29T20:36:36.174452025Z 🔗 Connecting...
+2025-12-29T20:36:36.276838443Z 🚀 Server running on port 10000
+2025-12-29T20:36:36.276860654Z 🌍 Network Access: http://<YOUR_IP>:10000
+2025-12-29T20:36:36.276874334Z 🔧 Environment: production
+2025-12-29T20:36:36.276907985Z 📍 Frontend: http://localhost:10000
+2025-12-29T20:36:36.277039098Z 📍 API: http://localhost:10000/api
+2025-12-29T20:36:36.277266604Z 📍 MongoDB State: 2
+2025-12-29T20:36:36.277278224Z 📊 Available endpoints:
+2025-12-29T20:36:36.277281984Z    GET  /api              - API status
+2025-12-29T20:36:36.277285054Z    GET  /api/test         - Test endpoint
+2025-12-29T20:36:36.277365026Z    GET  /api/summary      - Get all summaries
+2025-12-29T20:36:36.277372786Z    POST /api/summary      - Create new summary
+2025-12-29T20:36:37.398197645Z 💡 Troubleshooting:
+2025-12-29T20:36:37.398199265Z ❌ MongoDB Connection Error: bad auth : authentication failed
+2025-12-29T20:36:37.398229836Z 1. Check NODE_ENV in your environment variables.
+2025-12-29T20:36:37.398233326Z 2. If production, ensure MONGO_URI is set.
+2025-12-29T20:36:37.398237066Z 3. If development, ensure local mongod is running.
+2025-12-29T20:37:15.117261924Z ==> Running 'npm start'
+2025-12-29T20:37:16.010702195Z 
+2025-12-29T20:37:16.010731205Z > countcalory-server@1.0.0 start
+2025-12-29T20:37:16.010735065Z > node server.js
+2025-12-29T20:37:16.010736776Z 
+2025-12-29T20:37:19.916279974Z 🔍 Environment Detection: PRODUCTION
+2025-12-29T20:37:19.916597342Z ☁️ Mode: PRODUCTION -> Usando MongoDB Atlas
+2025-12-29T20:37:19.916694754Z 🔗 Target URI: mongodb+srv://andres777monthana:****@cluster0.d7j9y2u.mongodb.net/countcalory?retryWrites=true&w=majority&appName=Cluster0
+2025-12-29T20:37:19.916706904Z 
+2025-12-29T20:37:19.916710934Z 
+2025-12-29T20:37:19.916789256Z 🔗 Connecting...
+2025-12-29T20:37:20.018625311Z 🚀 Server running on port 10000
+2025-12-29T20:37:20.018656202Z 🌍 Network Access: http://<YOUR_IP>:10000
+2025-12-29T20:37:20.018674922Z 🔧 Environment: production
+2025-12-29T20:37:20.018679673Z 📍 Frontend: http://localhost:10000
+2025-12-29T20:37:20.018796876Z 📍 API: http://localhost:10000/api
+2025-12-29T20:37:20.019023421Z 📍 MongoDB State: 2
+2025-12-29T20:37:20.019033521Z 📊 Available endpoints:
+2025-12-29T20:37:20.019043222Z    GET  /api              - API status
+2025-12-29T20:37:20.019046962Z    GET  /api/test         - Test endpoint
+2025-12-29T20:37:20.019119964Z    GET  /api/summary      - Get all summaries
+2025-12-29T20:37:20.019129284Z    POST /api/summary      - Create new summary
+2025-12-29T20:37:21.233015584Z ❌ MongoDB Connection Error: bad auth : authentication failed
+2025-12-29T20:37:21.233046984Z 💡 Troubleshooting:
+2025-12-29T20:37:21.233066975Z 1. Check NODE_ENV in your environment variables.
+2025-12-29T20:37:21.233071425Z 2. If production, ensure MONGO_URI is set.
+2025-12-29T20:37:21.233075825Z 3. If development, ensure local mongod is running.
+2025-12-29T20:38:16.314710307Z ==> Running 'npm start'
+2025-12-29T20:38:17.218244095Z 
+2025-12-29T20:38:17.218269215Z > countcalory-server@1.0.0 start
+2025-12-29T20:38:17.218273706Z > node server.js
+2025-12-29T20:38:17.218275935Z 
+2025-12-29T20:38:21.417560014Z 🔍 Environment Detection: PRODUCTION
+2025-12-29T20:38:21.417885702Z ☁️ Mode: PRODUCTION -> Usando MongoDB Atlas
+2025-12-29T20:38:21.417961144Z 🔗 Target URI: mongodb+srv://andres777monthana:****@cluster0.d7j9y2u.mongodb.net/countcalory?retryWrites=true&w=majority&appName=Cluster0
+2025-12-29T20:38:21.417972334Z 
+2025-12-29T20:38:21.417976344Z 
+2025-12-29T20:38:21.417986374Z 🔗 Connecting...
+2025-12-29T20:38:21.61124456Z 🚀 Server running on port 10000
+2025-12-29T20:38:21.611284911Z 🌍 Network Access: http://<YOUR_IP>:10000
+2025-12-29T20:38:21.611312702Z 🔧 Environment: production
+2025-12-29T20:38:21.611358013Z 📍 Frontend: http://localhost:10000
+2025-12-29T20:38:21.611473015Z 📍 API: http://localhost:10000/api
+2025-12-29T20:38:21.611718672Z 📍 MongoDB State: 2
+2025-12-29T20:38:21.611733592Z 📊 Available endpoints:
+2025-12-29T20:38:21.611771283Z    GET  /api              - API status
+2025-12-29T20:38:21.611779023Z    GET  /api/test         - Test endpoint
+2025-12-29T20:38:21.611792313Z    GET  /api/summary      - Get all summaries
+2025-12-29T20:38:21.611799703Z    POST /api/summary      - Create new summary
+2025-12-29T20:38:22.739612364Z ❌ MongoDB Connection Error: bad auth : authentication failed
+2025-12-29T20:38:22.739644295Z 💡 Troubleshooting:
+2025-12-29T20:38:22.739689896Z 1. Check NODE_ENV in your environment variables.
+2025-12-29T20:38:22.739693516Z 2. If production, ensure MONGO_URI is set.
+2025-12-29T20:38:22.739696546Z 3. If development, ensure local mongod is running.
