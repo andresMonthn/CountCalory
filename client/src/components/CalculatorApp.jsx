@@ -20,6 +20,7 @@ import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover
 import { useAuth } from '@/context/AuthContext';
 import axios from 'axios';
 import { SetPasswordDialog } from "@/components/SetPasswordDialog";
+import { API_URL } from '@/config/api';
 
 const exerciseOptions = [
   { name: "Caminata ligera 30 min", calories: 100 },
@@ -78,7 +79,7 @@ export default function CalculatorApp() {
 
   const saveProfile = async () => {
     try {
-        const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:4000/api';
+        const apiUrl = API_URL;
         const { data } = await axios.put(`${apiUrl}/auth/profile`, {
             weight: weightKg,
             height: heightCm,

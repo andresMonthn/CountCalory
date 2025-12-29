@@ -5,6 +5,7 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import { foodOptions } from "@/foodOptions";
+import { API_URL } from '@/config/api';
 
 export function FoodCombobox({ onAdd, disabled, className = "" }) {
   const [open, setOpen] = React.useState(false);
@@ -65,7 +66,7 @@ export function FoodCombobox({ onAdd, disabled, className = "" }) {
       // abortar solicitud anterior
       if (ctrlRef.current) ctrlRef.current.abort();
       ctrlRef.current = new AbortController();
-      const api = import.meta.env.VITE_API_URL + `/foods/search?q=${encodeURIComponent(t)}&limit=10`;
+      const api = API_URL + `/foods/search?q=${encodeURIComponent(t)}&limit=10`;
       const res = await fetch(api, { headers: { 'Accept': 'application/json' }, signal: ctrlRef.current.signal });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();

@@ -76,7 +76,7 @@ export const AuthProvider = ({ children }) => {
   const verifyToken = async (email, token) => {
     try {
       console.log('🔐 Verifying token for:', email);
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:4000/api';
+      const apiUrl = API_URL;
       const { data } = await axios.post(`${apiUrl}/auth/verify`, { email, token });
       
       console.log('✅ Token verified, user data received:', data);

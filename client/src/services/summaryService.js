@@ -1,6 +1,7 @@
 import axios from 'axios';
+import { API_URL } from '../config/api';
 
-const API_SUMMARY = import.meta.env.VITE_API_URL + '/summary';
+const API_SUMMARY = API_URL + '/summary';
 
 export async function getSummaryHistory() {
   try {

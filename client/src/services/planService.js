@@ -36,12 +36,14 @@ function macroRatios(goal) {
   return { carbs: 0.5, proteina: 0.25, grasas: 0.25 };
 }
 
+import { API_URL } from '../config/api';
+
 async function fetchFoodsFromApi(terms, limit = 50) {
   const out = [];
   const seen = new Set();
   for (const t of terms) {
     try {
-      const api = import.meta.env.VITE_API_URL + `/foods/search`;
+      const api = API_URL + `/foods/search`;
       const res = await axios.get(api, {
         params: { q: t, limit },
         headers: { 'Accept': 'application/json' }
