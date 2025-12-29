@@ -56,22 +56,22 @@ export function MacroTable({ foods, onQtyChange, onGramsChange, onReachEnd }) {
                 <td className="p-2">{fmt(factor * Number(f.calories || 0))}</td>
                 <td className="p-2">
                   <div className="flex items-center gap-1">
-                    <Button size="sm" variant="outline" onClick={() => onQtyChange?.(i, Math.max(1, q - 1))}>-</Button>
-                    <span className="px-2">{q}</span>
-                    <Button size="sm" variant="outline" onClick={() => onQtyChange?.(i, q + 1)}>+</Button>
+                    <Button size="icon" className="h-8 w-8" variant="outline" onClick={() => onQtyChange?.(i, Math.max(1, q - 1))}>-</Button>
+                    <span className="px-2 w-8 text-center font-medium">{q}</span>
+                    <Button size="icon" className="h-8 w-8" variant="outline" onClick={() => onQtyChange?.(i, q + 1)}>+</Button>
                   </div>
                 </td>
                 <td className="p-2">
                   <div className="flex items-center gap-1">
-                    <Button size="sm" variant="outline" onClick={() => {
+                    <Button size="icon" className="h-8 w-8" variant="outline" onClick={() => {
                       const prevIdx = idx > 0 ? idx - 1 : 0;
                       const nextG = steps[prevIdx] ?? 25;
                       onGramsChange?.(i, nextG);
                     }}>
                       <ArrowDown size={14} />
                     </Button>
-                    <span className="px-2">{g}g</span>
-                    <Button size="sm" variant="outline" onClick={() => {
+                    <span className="px-2 w-10 text-center font-medium">{g}g</span>
+                    <Button size="icon" className="h-8 w-8" variant="outline" onClick={() => {
                       const nextIdx = idx >= 0 && idx < steps.length - 1 ? idx + 1 : steps.length - 1;
                       const nextG = steps[nextIdx] ?? 150;
                       onGramsChange?.(i, nextG);

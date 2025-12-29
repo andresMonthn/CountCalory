@@ -7,14 +7,12 @@ import express from 'express';       // Framework web para Node.js
 import mongoose from 'mongoose';     // ODM para MongoDB
 import path from 'path';             // Manejo de rutas de archivos
 import { fileURLToPath } from 'url'; // Necesario para obtener __dirname en ES Modules
-
 // -------------------------------
 // 📌 Importar rutas personalizadas
 // -------------------------------
 import summaryRoutes from './routes/summaryRoutes.js';
 import foodsRoutes from './routes/foods.js';
 import authRoutes from './routes/authRoutes.js';
-
 // -------------------------------
 // 📌 Manejo de __dirname en ESModules
 // -------------------------------
@@ -42,38 +40,39 @@ app.use((req, res, next) => {
 });
 
 // -------------------------------
-// 📌 Conexión a MongoDB (Auto-detect: Atlas vs Local)
+// 📌 Conexión a MongoDB (Controlado por NODE_ENV)
 // -------------------------------
 const connectDB = async () => {
   try {
-    let uri = process.env.MONGODB_URI || process.env.MONGO_URI;
-    let isLocal = false;
+    // Detectar entorno: 'production' (Atlas) vs 'development' (Local)
+    const env = process.env.NODE_ENV || 'development';
+    let uri;
 
-    console.log('🔍 Checking MongoDB connection...');
-
-    if (!uri) {
-      console.warn('⚠️ MONGODB_URI not found in environment variables.');
-      console.log('🔄 Switching to Local MongoDB...');
-      uri = 'mongodb://127.0.0.1:27017/countcalory';
-      isLocal = true;
-    }
-
-    if (uri.includes('mongodb+srv://')) {
-      console.log('☁️ Target: MongoDB Atlas (Production/Cloud)');
-    } else if (isLocal || uri.includes('localhost') || uri.includes('127.0.0.1')) {
-      console.log('🏠 Target: Local MongoDB (Development)');
+    console.log(`🔍 Environment Detection: ${env.toUpperCase()}`);
+    
+    if (env === 'production') {
+      console.log('☁️ Mode: PRODUCTION -> Usando MongoDB Atlas');
+      uri = process.env.MONGO_URI || process.env.MONGODB_URI;
+      
+      if (!uri) {
+         throw new Error('❌ MONGO_URI no definida para entorno de producción');
+      }
     } else {
-      console.log('🔗 Target: Custom MongoDB URI');
+      console.log('🏠 Mode: DEVELOPMENT -> Usando MongoDB Local');
+      uri = process.env.MONGODB_URI_LOCAL || 'mongodb://127.0.0.1:27017/countcalory';
     }
+
+    console.log(`🔗 Target URI: ${uri.replace(/:([^:@]+)@/, ':****@')}`);
 
     console.log('🔗 Connecting...');
     
     const conn = await mongoose.connect(uri, {
-      serverSelectionTimeoutMS: 5000, // tiempo de espera si no conecta
+      serverSelectionTimeoutMS: 5000,
       socketTimeoutMS: 45000,
     });
     
-    console.log(`✅ MongoDB Connected to: ${conn.connection.name}`);
+    console.log(`✅ MongoDB Connected successfully!`);
+    console.log(`📍 Database Name: ${conn.connection.name}`);
     console.log(`📍 Host: ${conn.connection.host}`);
     
     return conn;
@@ -81,10 +80,10 @@ const connectDB = async () => {
   } catch (error) {
     console.error('❌ MongoDB Connection Error:', error.message);
     console.log('💡 Troubleshooting:');
-    console.log('1. If using Atlas, check your IP Whitelist in MongoDB Atlas.');
-    console.log('2. If using Local, ensure mongod service is running.');
-    console.log('3. Check credentials in .env file.');
-    process.exit(1); // 🔴 Cierra el servidor si falla la conexión
+    console.log('1. Check NODE_ENV in your environment variables.');
+    console.log('2. If production, ensure MONGO_URI is set.');
+    console.log('3. If development, ensure local mongod is running.');
+    process.exit(1); 
   }
 };
 
@@ -153,8 +152,10 @@ app.use((error, req, res, next) => {
 // -------------------------------
 // 📌 Iniciar servidor
 // -------------------------------
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
   console.log(`🚀 Server running on port ${PORT}`);
+  console.log(`🌍 Network Access: http://<YOUR_IP>:${PORT}`);
+  console.log(`🔧 Environment: ${process.env.NODE_ENV || 'development'}`);
   console.log(`📍 Frontend: http://localhost:${PORT}`);
   console.log(`📍 API: http://localhost:${PORT}/api`);
   console.log(`📍 MongoDB State: ${mongoose.connection.readyState}`);

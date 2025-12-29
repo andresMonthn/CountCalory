@@ -11,9 +11,9 @@ export function FoodSection({ foodList, onAdd, removeFood }) {
       {foodList.length > 0 && (
         <ul className="mt-1 text-left">
           {foodList.map((f, i) => (
-            <li key={`${f.name}-${f.calories}-${i}`} className="flex flex-row items-center justify-start cursor-pointer bg-slate-900 text-slate-200 p-1 my-0.5 text-xs sm:text-[10pt]">
-              <span className="truncate pr-2">{f.name} ({f.calories} Cal)</span>
-              <Button cursor="pointer" onClick={() => removeFood(i)} className="ml-auto h-7 px-2 text-xs eliminarcomida" variant="outline">Eliminar</Button>
+            <li key={`${f.name}-${f.calories}-${i}`} className="flex flex-row items-center justify-start cursor-pointer bg-slate-900 text-slate-200 p-2 my-1 rounded-md text-sm shadow-sm border border-slate-800">
+              <span className="truncate pr-2 flex-1 font-medium">{f.name} <span className="text-slate-400 text-xs">({f.calories} Cal)</span></span>
+              <Button cursor="pointer" onClick={() => removeFood(i)} className="ml-2 h-9 px-3 text-xs bg-red-900/30 hover:bg-red-900/50 text-red-200 border border-red-900/50" variant="outline">Eliminar</Button>
             </li>
           ))}
         </ul>
