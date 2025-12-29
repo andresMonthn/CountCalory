@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import axios from 'axios';
+import { API_URL } from '../config/api';
 
 const AuthContext = createContext();
 
@@ -25,7 +26,7 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (email) => {
     try {
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:4000/api';
+      const apiUrl = API_URL;
       console.log(`📧 Enviando Magic Link a: ${apiUrl}/auth/login`);
       
       await axios.post(`${apiUrl}/auth/login`, { email });
