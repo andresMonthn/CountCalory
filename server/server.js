@@ -46,12 +46,14 @@ const connectDB = async () => {
   try {
     // Detectar entorno: 'production' (Atlas) vs 'development' (Local)
     const env = process.env.NODE_ENV || 'development';
+    const dbMode = process.env.DB_MODE; // Soporte para 'atlas' explícito en dev
     let uri;
 
     console.log(`🔍 Environment Detection: ${env.toUpperCase()}`);
+    if (dbMode) console.log(`🔍 DB Mode Override: ${dbMode.toUpperCase()}`);
     
-    if (env === 'production') {
-      console.log('☁️ Mode: PRODUCTION -> Usando MongoDB Atlas');
+    if (env === 'production' || dbMode === 'atlas') {
+      console.log('☁️ Mode: PRODUCTION/ATLAS -> Usando MongoDB Atlas');
       uri = process.env.MONGO_URI || process.env.MONGODB_URI;
       
       if (!uri) {

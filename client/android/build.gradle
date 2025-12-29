@@ -24,6 +24,29 @@ allprojects {
     }
 }
 
+subprojects {
+    // Forzar Java 17 para todos los módulos (incluyendo capacitor-android)
+    afterEvaluate { project ->
+        if (project.extensions.findByName("android")) {
+            project.android {
+                compileOptions {
+                    sourceCompatibility JavaVersion.VERSION_17
+                    targetCompatibility JavaVersion.VERSION_17
+                }
+            }
+        }
+    }
+
+    // Resolver conflictos de versiones de Kotlin
+    configurations.all {
+        resolutionStrategy.eachDependency { details ->
+            if (details.requested.group == 'org.jetbrains.kotlin' && details.requested.name.startsWith('kotlin-stdlib')) {
+                details.useVersion '1.8.22'
+            }
+        }
+    }
+}
+
 task clean(type: Delete) {
     delete rootProject.buildDir
 }

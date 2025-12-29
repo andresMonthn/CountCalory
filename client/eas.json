@@ -4,6 +4,9 @@
   },
   "build": {
     "preview": {
+      "env": {
+        "VITE_API_URL": "https://countcalory.onrender.com/api"
+      },
       "android": {
         "buildType": "apk",
         "gradleCommand": ":app:assembleDebug",
@@ -11,6 +14,9 @@
       }
     },
     "production": {
+      "env": {
+        "VITE_API_URL": "https://countcalory.onrender.com/api"
+      },
       "android": {
         "buildType": "apk",
         "gradleCommand": ":app:assembleRelease",
