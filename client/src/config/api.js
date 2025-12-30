@@ -7,8 +7,10 @@
 const isProduction = import.meta.env.PROD; // Vite automatically sets this to true when building
 const envApiUrl = import.meta.env.VITE_API_URL;
 
-// Production URL for your Render backend
-const PROD_URL = 'https://countcalory.onrender.com/api';
+// Production URL
+// Use relative path '/api' for Vercel (same domain)
+// Or use specific URL if needed for other platforms
+const PROD_URL = '/api';
 
 // Local Development URL
 const DEV_URL = 'http://localhost:4000/api';

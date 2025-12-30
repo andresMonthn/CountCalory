@@ -90,9 +90,20 @@ router.post('/login', async (req, res) => {
     await user.save();
 
     // 4. Construct Link
-    // Assuming client runs on port 5173 or 3000. Need to make this configurable.
-    const clientUrl = process.env.CLIENT_URL || 'http://localhost:5173'; 
+    // Determine the client URL dynamically based on the request origin (for Vercel/Local)
+    // or fallback to environment variable or localhost.
+    let clientUrl = process.env.CLIENT_URL;
+    
+    if (!clientUrl && req.get('origin')) {
+        clientUrl = req.get('origin');
+    }
+    
+    if (!clientUrl) {
+         clientUrl = 'http://localhost:5173';
+    }
+    
     const loginUrl = `${clientUrl}/verify?token=${loginToken}&email=${email}`;
+    console.log(`🔗 Generated Magic Link base URL: ${clientUrl}`);
 
     // 5. Send Email
     // Prioritize Nodemailer as requested, fallback to Resend API logic if needed or removed entirely.
