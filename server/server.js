@@ -128,11 +128,11 @@ app.get('*', (req, res) => {
     // Si la ruta empieza con /api/ y no existe → 404 de API
     return res.status(404).json({ 
       error: 'API endpoint not found',
+      requestedPath: req.path,
       availableEndpoints: {
-        summary: {
-          GET: '/api/summary',
-          POST: '/api/summary'
-        },
+        summary: '/api/summary',
+        auth: '/api/auth',
+        foods: '/api/foods',
         test: '/api/test'
       }
     });
