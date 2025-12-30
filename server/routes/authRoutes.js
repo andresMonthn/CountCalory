@@ -97,13 +97,14 @@ router.post('/login', async (req, res) => {
 
     // Real Email Sending
     try {
+        const port = parseInt(process.env.SMTP_PORT || '587');
         const transporter = nodemailer.createTransport({
             host: process.env.SMTP_HOST,
-            port: parseInt(process.env.SMTP_PORT || '587'),
-            secure: false, // true for 465, false for other ports
+            port: port,
+            secure: port === 465, // true for 465, false for other ports
             auth: {
                 user: process.env.SMTP_USER,
-                pass: process.env.SMTP_PASS,
+                pass: process.env.SMTP_PASS ? process.env.SMTP_PASS.replace(/\s+/g, '') : undefined, // Remove spaces just in case
             },
             tls: {
                 rejectUnauthorized: false // Helps with some self-signed cert issues in certain envs
