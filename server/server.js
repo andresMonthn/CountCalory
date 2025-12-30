@@ -165,16 +165,20 @@ app.use((error, req, res, next) => {
 // -------------------------------
 // 📌 Iniciar servidor
 // -------------------------------
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`🚀 Server running on port ${PORT}`);
-  console.log(`🌍 Network Access: http://<YOUR_IP>:${PORT}`);
-  console.log(`🔧 Environment: ${process.env.NODE_ENV || 'development'}`);
-  console.log(`📍 Frontend: http://localhost:${PORT}`);
-  console.log(`📍 API: http://localhost:${PORT}/api`);
-  console.log(`📍 MongoDB State: ${mongoose.connection.readyState}`);
-  console.log('📊 Available endpoints:');
-  console.log('   GET  /api              - API status');
-  console.log('   GET  /api/test         - Test endpoint');
-  console.log('   GET  /api/summary      - Get all summaries');
-  console.log('   POST /api/summary      - Create new summary');
-});
+if (process.env.NODE_ENV !== 'production') {
+  app.listen(PORT, '0.0.0.0', () => {
+    console.log(`🚀 Server running on port ${PORT}`);
+    console.log(`🌍 Network Access: http://<YOUR_IP>:${PORT}`);
+    console.log(`🔧 Environment: ${process.env.NODE_ENV || 'development'}`);
+    console.log(`📍 Frontend: http://localhost:${PORT}`);
+    console.log(`📍 API: http://localhost:${PORT}/api`);
+    console.log(`📍 MongoDB State: ${mongoose.connection.readyState}`);
+    console.log('📊 Available endpoints:');
+    console.log('   GET  /api              - API status');
+    console.log('   GET  /api/test         - Test endpoint');
+    console.log('   GET  /api/summary      - Get all summaries');
+    console.log('   POST /api/summary      - Create new summary');
+  });
+}
+
+export default app;

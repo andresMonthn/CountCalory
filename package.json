@@ -7,7 +7,7 @@
     "mobile"
   ],
   "scripts": {
-    "build": "cd client && npm install && npm run build && cd ../server && npm install",
+    "build": "echo 'Vercel will build client and server separately based on vercel.json'",
     "install-all": "npm install && cd client && npm install && cd ../server && npm install && cd ../mobile && npm install"
   },
   "dependencies": {
