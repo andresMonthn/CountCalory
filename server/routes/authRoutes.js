@@ -82,44 +82,20 @@ router.post('/login', async (req, res) => {
     const loginUrl = `${clientUrl}/verify?token=${loginToken}&email=${email}`;
 
     // 5. Send Email
-    // Mock for Dev if no SMTP
-    if (!process.env.SMTP_HOST) {
-        console.log('------------------------------------------------');
-        console.log(`Login Link for ${email}:`);
-        console.log(loginUrl);
-        console.log('------------------------------------------------');
-        
-        return res.status(200).json({ 
-            message: 'Magic link sent (check console for dev)', 
-            devLink: loginUrl // Returning it for easier testing if needed
-        });
-    }
-
-    // Real Email Sending
-    try {
-        const port = parseInt(process.env.SMTP_PORT || '587');
-        const transporter = nodemailer.createTransport({
-            host: process.env.SMTP_HOST,
-            port: port,
-            secure: port === 465, // true for 465, false for other ports
-            auth: {
-                user: process.env.SMTP_USER,
-                pass: process.env.SMTP_PASS ? process.env.SMTP_PASS.replace(/\s+/g, '') : undefined, // Remove spaces just in case
-            },
-            tls: {
-                rejectUnauthorized: false // Helps with some self-signed cert issues in certain envs
-            }
-        });
-
-        // Verify connection configuration
-        await transporter.verify();
-        console.log('✅ SMTP Connection verified');
-
-        const mailOptions = {
-            from: `"CountCalory" <${process.env.SMTP_USER}>`,
-            to: email,
-            subject: '🔐 Tu enlace mágico de acceso a CountCalory',
-            html: `
+    // Option A: Use Resend API (Recommended for Render/Cloud to avoid SMTP timeouts)
+    if (process.env.RESEND_API_KEY) {
+        try {
+            const resendResponse = await fetch('https://api.resend.com/emails', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${process.env.RESEND_API_KEY}`
+                },
+                body: JSON.stringify({
+                    from: 'CountCalory <onboarding@resend.dev>', // Or your verified domain
+                    to: [email],
+                    subject: '🔐 Tu enlace mágico de acceso a CountCalory',
+                    html: `
             <!DOCTYPE html>
             <html>
             <head>
@@ -184,6 +160,67 @@ router.post('/login', async (req, res) => {
             </body>
             </html>
             `
+                })
+            });
+
+            if (!resendResponse.ok) {
+                const errorData = await resendResponse.json();
+                console.error('❌ Resend API Error:', errorData);
+                throw new Error(`Resend API Error: ${errorData.message || resendResponse.statusText}`);
+            }
+
+            console.log(`✅ Email sent via Resend to ${email}`);
+            return res.status(200).json({ message: 'Email sent via Resend' });
+
+        } catch (error) {
+            console.error('❌ Failed to send via Resend, falling back to SMTP if configured:', error);
+            // If Resend fails, we let it fall through to SMTP or return error
+             return res.status(500).json({ 
+                message: 'Error sending email via Resend',
+                error: error.message
+            });
+        }
+    }
+
+    // Option B: Mock for Dev if no SMTP and no Resend
+    // if (!process.env.SMTP_HOST) {
+        console.log('------------------------------------------------');
+        console.log(`Login Link for ${email}:`);
+        console.log(loginUrl);
+        console.log('------------------------------------------------');
+        
+        return res.status(200).json({ 
+            message: 'Magic link sent (check console for dev)', 
+            devLink: loginUrl // Returning it for easier testing if needed
+        });
+    // }
+
+    /* SMTP REMOVED TO PREVENT GMAIL BLOCKS
+    // Real Email Sending
+    try {
+        const port = parseInt(process.env.SMTP_PORT || '587');
+        const transporter = nodemailer.createTransport({
+            host: process.env.SMTP_HOST,
+            port: port,
+            secure: port === 465, // true for 465, false for other ports
+            auth: {
+                user: process.env.SMTP_USER,
+                pass: process.env.SMTP_PASS ? process.env.SMTP_PASS.replace(/\s+/g, '') : undefined, // Remove spaces just in case
+            },
+            tls: {
+                rejectUnauthorized: false // Helps with some self-signed cert issues in certain envs
+            }
+        });
+
+        // Verify connection configuration
+        await transporter.verify();
+        console.log('✅ SMTP Connection verified');
+
+        const mailOptions = {
+            from: `"CountCalory" <${process.env.SMTP_USER}>`,
+            to: email,
+            subject: '🔐 Tu enlace mágico de acceso a CountCalory',
+            html: `...`
         };
 
         await transporter.sendMail(mailOptions);
@@ -201,6 +238,7 @@ router.post('/login', async (req, res) => {
             command: sendError.command
         });
     }
+    */
 
   } catch (error) {
     console.error(error);
