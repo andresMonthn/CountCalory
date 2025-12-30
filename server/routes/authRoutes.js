@@ -2,10 +2,23 @@ import express from 'express';
 import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
 import User from '../models/User.js';
-import nodemailer from 'nodemailer';
 import { protect } from '../middleware/authMiddleware.js';
+import { sendEmail } from '../utils/sendEmail.js';
 
 const router = express.Router();
+
+// @desc    Status check for Auth Routes
+// @route   GET /api/auth/
+// @access  Public
+router.get('/', (req, res) => {
+    res.json({
+        message: 'Auth Service is running',
+        endpoints: {
+            login: 'POST /login (Magic Link)',
+            loginPassword: 'POST /login-password'
+        }
+    });
+});
 
 // Generate JWT
 const generateToken = (id) => {
@@ -82,20 +95,10 @@ router.post('/login', async (req, res) => {
     const loginUrl = `${clientUrl}/verify?token=${loginToken}&email=${email}`;
 
     // 5. Send Email
-    // Option A: Use Resend API (Recommended for Render/Cloud to avoid SMTP timeouts)
-    if (process.env.RESEND_API_KEY) {
-        try {
-            const resendResponse = await fetch('https://api.resend.com/emails', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${process.env.RESEND_API_KEY}`
-                },
-                body: JSON.stringify({
-                    from: 'CountCalory <onboarding@resend.dev>', // Or your verified domain
-                    to: [email],
-                    subject: '🔐 Tu enlace mágico de acceso a CountCalory',
-                    html: `
+    // Prioritize Nodemailer as requested, fallback to Resend API logic if needed or removed entirely.
+    // We will use the new robust sendEmail utility.
+    
+    const magicLinkHtml = `
             <!DOCTYPE html>
             <html>
             <head>
@@ -159,86 +162,28 @@ router.post('/login', async (req, res) => {
                 </table>
             </body>
             </html>
-            `
-                })
-            });
+            `;
 
-            if (!resendResponse.ok) {
-                const errorData = await resendResponse.json();
-                console.error('❌ Resend API Error:', errorData);
-                throw new Error(`Resend API Error: ${errorData.message || resendResponse.statusText}`);
-            }
-
-            console.log(`✅ Email sent via Resend to ${email}`);
-            return res.status(200).json({ message: 'Email sent via Resend' });
-
-        } catch (error) {
-            console.error('❌ Failed to send via Resend, falling back to SMTP if configured:', error);
-            // If Resend fails, we let it fall through to SMTP or return error
-             return res.status(500).json({ 
-                message: 'Error sending email via Resend',
-                error: error.message
-            });
-        }
-    }
-
-    // Option B: Mock for Dev if no SMTP and no Resend
-    // if (!process.env.SMTP_HOST) {
-        console.log('------------------------------------------------');
-        console.log(`Login Link for ${email}:`);
-        console.log(loginUrl);
-        console.log('------------------------------------------------');
-        
-        return res.status(200).json({ 
-            message: 'Magic link sent (check console for dev)', 
-            devLink: loginUrl // Returning it for easier testing if needed
-        });
-    // }
-
-    /* SMTP REMOVED TO PREVENT GMAIL BLOCKS
-    // Real Email Sending
     try {
-        const port = parseInt(process.env.SMTP_PORT || '587');
-        const transporter = nodemailer.createTransport({
-            host: process.env.SMTP_HOST,
-            port: port,
-            secure: port === 465, // true for 465, false for other ports
-            auth: {
-                user: process.env.SMTP_USER,
-                pass: process.env.SMTP_PASS ? process.env.SMTP_PASS.replace(/\s+/g, '') : undefined, // Remove spaces just in case
-            },
-            tls: {
-                rejectUnauthorized: false // Helps with some self-signed cert issues in certain envs
-            }
-        });
-
-        // Verify connection configuration
-        await transporter.verify();
-        console.log('✅ SMTP Connection verified');
-
-        const mailOptions = {
-            from: `"CountCalory" <${process.env.SMTP_USER}>`,
+        await sendEmail({
             to: email,
             subject: '🔐 Tu enlace mágico de acceso a CountCalory',
-            html: `...`
-        };
-
-        await transporter.sendMail(mailOptions);
-        console.log(`✅ Email sent to ${email}`);
-        res.status(200).json({ message: 'Email sent' });
-
-    } catch (sendError) {
-        console.error('❌ Error sending email:', sendError);
+            html: magicLinkHtml
+        });
         
-        // Return explicit error to client for debugging
-        res.status(500).json({ 
+        console.log(`✅ Email sent via Nodemailer to ${email}`);
+        return res.status(200).json({ message: 'Email sent successfully' });
+
+    } catch (error) {
+        console.error('❌ Failed to send email via Nodemailer:', error);
+        
+        // Return helpful error
+        return res.status(500).json({ 
             message: 'Error sending email',
-            error: sendError.message,
-            code: sendError.code,
-            command: sendError.command
+            error: error.message,
+            hint: 'Check server logs for SMTP details.'
         });
     }
-    */
 
   } catch (error) {
     console.error(error);

@@ -14,6 +14,16 @@ import summaryRoutes from './routes/summaryRoutes.js';
 import foodsRoutes from './routes/foods.js';
 import authRoutes from './routes/authRoutes.js';
 // -------------------------------
+// 📌 Verificación de configuración SMTP
+// -------------------------------
+if (!process.env.SMTP_HOST || !process.env.SMTP_USER || !process.env.SMTP_PASS) {
+  console.warn('⚠️ ADVERTENCIA: Configuración SMTP incompleta. El envío de correos puede fallar.');
+  console.warn('   Asegúrese de definir SMTP_HOST, SMTP_USER y SMTP_PASS en las variables de entorno.');
+} else {
+  console.log('✅ Configuración SMTP detectada.');
+}
+
+// -------------------------------
 // 📌 Manejo de __dirname en ESModules
 // -------------------------------
 const __filename = fileURLToPath(import.meta.url);
