@@ -96,21 +96,29 @@ router.post('/login', async (req, res) => {
     }
 
     // Real Email Sending
-    const transporter = nodemailer.createTransport({
-        host: process.env.SMTP_HOST,
-        port: process.env.SMTP_PORT,
-        secure: false, 
-        auth: {
-            user: process.env.SMTP_USER,
-            pass: process.env.SMTP_PASS,
-        },
-    });
+    try {
+        const transporter = nodemailer.createTransport({
+            host: process.env.SMTP_HOST,
+            port: parseInt(process.env.SMTP_PORT || '587'),
+            secure: false, // true for 465, false for other ports
+            auth: {
+                user: process.env.SMTP_USER,
+                pass: process.env.SMTP_PASS,
+            },
+            tls: {
+                rejectUnauthorized: false // Helps with some self-signed cert issues in certain envs
+            }
+        });
 
-    const mailOptions = {
-        from: '"CountCalory" <andres.777.monthana@gmail.com>',
-        to: email,
-        subject: '🔐 Tu enlace mágico de acceso a CountCalory',
-        html: `
+        // Verify connection configuration
+        await transporter.verify();
+        console.log('✅ SMTP Connection verified');
+
+        const mailOptions = {
+            from: `"CountCalory" <${process.env.SMTP_USER}>`,
+            to: email,
+            subject: '🔐 Tu enlace mágico de acceso a CountCalory',
+            html: `
             <!DOCTYPE html>
             <html>
             <head>
@@ -174,27 +182,22 @@ router.post('/login', async (req, res) => {
                 </table>
             </body>
             </html>
-        `
-    };
+            `
+        };
 
-    try {
         await transporter.sendMail(mailOptions);
         console.log(`✅ Email sent to ${email}`);
         res.status(200).json({ message: 'Email sent' });
+
     } catch (sendError) {
         console.error('❌ Error sending email:', sendError);
         
-        // Fallback for development: Print link to console if email fails
-        console.log('------------------------------------------------');
-        console.log('⚠️ EMAIL FAILED. EMERGENCY LOGIN LINK:');
-        console.log(loginUrl);
-        console.log('------------------------------------------------');
-
-        // Return error to client so they know email didn't go out, 
-        // but dev can use console link.
+        // Return explicit error to client for debugging
         res.status(500).json({ 
-            message: 'Error sending email (check server console for link)',
-            error: sendError.message 
+            message: 'Error sending email',
+            error: sendError.message,
+            code: sendError.code,
+            command: sendError.command
         });
     }
 
