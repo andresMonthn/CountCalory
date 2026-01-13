@@ -8,8 +8,10 @@ import { BudgetDisplay } from "@/components/BudgetDisplay";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { userProfileService } from "@/services/userService";
+import { useAlert } from "@/context/AlertContext";
 
 export function ProfilePanel({ gender, setGender, heightCm, setHeightCm, weightKg, setWeightKg, ageYears, setAgeYears, activity, setActivity, goal, setGoal, budget, mealsCount, setMealsCount, onSaveProfile }) {
+  const { success, error: showError } = useAlert();
   const { user, updateUser } = useAuth();
   const [isSyncing, setIsSyncing] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -80,10 +82,10 @@ export function ProfilePanel({ gender, setGender, heightCm, setHeightCm, weightK
           // Update AuthContext
           updateUser(updatedUser);
           
-          alert('✅ Perfil guardado y sincronizado');
+          success('Perfil guardado y sincronizado');
       } catch (error) {
           console.error('Save error:', error);
-          alert('❌ Error al guardar perfil');
+          showError('Error al guardar perfil');
       } finally {
           setLoading(false);
       }

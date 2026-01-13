@@ -21,7 +21,16 @@ export const protect = async (req, res, next) => {
 
       next();
     } catch (error) {
-      console.error(error);
+      console.error('❌ Auth Error:', error.message);
+      
+      if (error.name === 'JsonWebTokenError') {
+         return res.status(401).json({ message: 'Token inválido o firma no coincidente. Por favor inicia sesión nuevamente.' });
+      }
+      
+      if (error.name === 'TokenExpiredError') {
+         return res.status(401).json({ message: 'Tu sesión ha expirado. Por favor inicia sesión nuevamente.' });
+      }
+
       res.status(401).json({ message: 'Not authorized, token failed' });
     }
   } else {

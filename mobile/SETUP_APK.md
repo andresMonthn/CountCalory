@@ -1,6 +1,9 @@
-# Generar APK de Android con Expo (React Native)
+# Generar Build de Android (APK / AAB) con Expo
 
-Para exportar tu aplicación como un archivo `.apk` instalable en cualquier dispositivo Android, utilizaremos **EAS Build** (Expo Application Services).
+Para exportar tu aplicación, utilizaremos **EAS Build** (Expo Application Services). Tenemos dos perfiles configurados:
+
+*   **Preview**: Genera un `.apk` instalable directamente (para testers y uso personal).
+*   **Production**: Genera un `.aab` (Android App Bundle) optimizado para subir a Google Play Console.
 
 ## Prerrequisitos
 
@@ -11,7 +14,7 @@ Para exportar tu aplicación como un archivo `.apk` instalable en cualquier disp
     npm install -g eas-cli
     ```
 
-## Pasos para generar el APK
+## Pasos para generar el Build
 
 ### 1. Iniciar sesión
 
@@ -32,20 +35,27 @@ eas build:configure
 
 *(Si te pregunta por la plataforma, elige `Android` o `All`)*.
 
-### 3. Generar el APK
+### 3. Seleccionar el tipo de Build
 
-Ejecuta el siguiente comando para iniciar la compilación en la nube de Expo. Hemos configurado el perfil `preview` para que genere un **APK** en lugar de un AAB (que es para la Play Store).
+#### Opción A: Versión de Prueba (APK)
+Ideal para probar en tu dispositivo sin subir a la tienda.
 
 ```bash
 eas build -p android --profile preview
 ```
 
-### 4. Descargar e Instalar
+1.  Al finalizar, obtendrás un enlace de descarga.
+2.  Descarga el `.apk` e instálalo en tu Android.
 
-1.  El proceso tomará unos minutos (dependiendo de la cola gratuita de Expo).
-2.  Al finalizar, la terminal te mostrará un enlace de descarga (ej. `https://expo.dev/artifacts/...`).
-3.  Descarga ese archivo `.apk` en tu celular.
-4.  Instálalo (es posible que debas permitir "Instalar de fuentes desconocidas").
+#### Opción B: Versión de Producción (AAB)
+Ideal para publicar en Google Play Store.
+
+```bash
+eas build -p android --profile production
+```
+
+1.  Al finalizar, descarga el archivo `.aab`.
+2.  Sube este archivo a tu cuenta de Google Play Console.
 
 ---
 

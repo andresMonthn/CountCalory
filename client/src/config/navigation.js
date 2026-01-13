@@ -1,4 +1,4 @@
-import { User, History, Info } from 'lucide-react';
+import { User, History, Info, BarChart3 } from 'lucide-react';
 
 export const NAV_ITEMS = [
   {
@@ -6,6 +6,13 @@ export const NAV_ITEMS = [
     label: 'Perfil',
     icon: User,
     position: 'left'
+  },
+  {
+    id: 'metrics',
+    label: 'Métricas',
+    icon: BarChart3,
+    position: 'left',
+    isDialog: true
   },
   {
     id: 'history',

@@ -18,6 +18,7 @@ import { generateBalancedPlan } from "@/services/planService";
 import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter } from "@/components/ui/alert-dialog";
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 import { useAuth } from '@/context/AuthContext';
+import { useAlert } from '@/context/AlertContext';
 import axios from 'axios';
 import { SetPasswordDialog } from "@/components/SetPasswordDialog";
 import { API_URL } from '@/config/api';
@@ -62,6 +63,7 @@ export default function CalculatorApp() {
   const isOnline = useOnline();
   const { history, refresh } = useHistoryPolling(isOnline);
   const { user, logout, updateUser } = useAuth();
+  const { success, error: showError } = useAlert();
 
   // Load user profile data on mount
   useEffect(() => {
@@ -87,11 +89,11 @@ export default function CalculatorApp() {
             activityLevel: activity
         });
         updateUser(data);
-        alert('✅ Perfil actualizado correctamente');
+        success('Perfil actualizado correctamente');
     } catch (error) {
         console.error('Error saving profile:', error);
         const msg = error.response?.data?.message || 'Error al guardar el perfil';
-        alert(`❌ ${msg}`);
+        showError(msg);
     }
   };
 
@@ -118,9 +120,9 @@ export default function CalculatorApp() {
     try {
       await saveSummaryData({ ...output, createdAt: new Date().toISOString() });
       await refresh();
-      alert("✅ Resumen guardado correctamente");
+      success("Resumen guardado correctamente");
     } catch (err) {
-      alert("❌ Error al guardar. Verifica la consola para más detalles.");
+      showError("Error al guardar. Verifica la consola para más detalles.");
     } finally {
       setLoading(false);
     }

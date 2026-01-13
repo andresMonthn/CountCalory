@@ -1,13 +1,16 @@
 import React, { useState } from 'react';
 import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel } from "@/components/ui/alert-dialog";
+import { MetricsPanel } from './Settings/SettingsComponents';
 import { NAV_ITEMS } from "@/config/navigation";
 
 export function NavigationBar({ currentView, onNavigate }) {
   const [aboutOpen, setAboutOpen] = useState(false);
+  const [metricsOpen, setMetricsOpen] = useState(false);
 
   const handleNavClick = (item) => {
     if (item.isDialog) {
       if (item.id === 'about') setAboutOpen(true);
+      if (item.id === 'metrics') setMetricsOpen(true);
     } else {
       onNavigate(item.id);
     }
@@ -55,6 +58,8 @@ export function NavigationBar({ currentView, onNavigate }) {
           ))}
         </div>
       </div>
+
+      <MetricsPanel isOpen={metricsOpen} onClose={() => setMetricsOpen(false)} />
 
       <AlertDialog open={aboutOpen} onOpenChange={setAboutOpen}>
         <AlertDialogContent>

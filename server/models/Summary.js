@@ -4,7 +4,8 @@ const summarySchema = new mongoose.Schema({
   userId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
-    required: true
+    required: true,
+    index: true
   },
   budget: { type: Number, required: true },
   consumed: { type: Number, required: true },

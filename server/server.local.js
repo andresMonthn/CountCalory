@@ -11,6 +11,7 @@ import mongoose from 'mongoose';
 import summaryRoutes from './routes/summaryRoutes.js';
 import foodsRoutes from './routes/foods.js';
 import authRoutes from './routes/authRoutes.js';
+import userRoutes from './routes/userRoutes.js';
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -41,6 +42,7 @@ const connectDB = async () => {
     const conn = await mongoose.connect(uri, {
       serverSelectionTimeoutMS: 5000, // tiempo máximo de espera
       socketTimeoutMS: 45000,
+      dbName: 'countcalory', // 🔒 Normalización de BD
     });
 
     console.log(`✅ Conectado a MongoDB (local) en: ${conn.connection.host}`);
@@ -81,6 +83,8 @@ app.get('/api/test', (req, res) => {
 app.use('/api/summary', summaryRoutes);
 // ✅ Rutas de auth
 app.use('/api/auth', authRoutes);
+// ✅ Rutas de usuario
+app.use('/api/user', userRoutes);
 // ✅ Rutas de alimentos (búsqueda local)
 app.use('/api/foods', foodsRoutes);
 

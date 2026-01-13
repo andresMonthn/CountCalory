@@ -13,6 +13,7 @@ import { fileURLToPath } from 'url'; // Necesario para obtener __dirname en ES M
 import summaryRoutes from './routes/summaryRoutes.js';
 import foodsRoutes from './routes/foods.js';
 import authRoutes from './routes/authRoutes.js';
+import userRoutes from './routes/userRoutes.js';
 // -------------------------------
 // 📌 Verificación de configuración SMTP
 // -------------------------------
@@ -21,6 +22,13 @@ if (!process.env.SMTP_HOST || !process.env.SMTP_USER || !process.env.SMTP_PASS) 
   console.warn('   Asegúrese de definir SMTP_HOST, SMTP_USER y SMTP_PASS en las variables de entorno.');
 } else {
   console.log('✅ Configuración SMTP detectada.');
+}
+
+// Verificar JWT Secret
+if (!process.env.JWT_SECRET) {
+    console.warn('⚠️ ADVERTENCIA: JWT_SECRET no está definido. Se usará un secreto inseguro por defecto.');
+} else {
+    console.log('🔐 JWT Secret configurado correctamente.');
 }
 
 // -------------------------------
@@ -81,6 +89,7 @@ const connectDB = async () => {
     const conn = await mongoose.connect(uri, {
       serverSelectionTimeoutMS: 5000,
       socketTimeoutMS: 45000,
+      dbName: 'countcalory', // 🔒 Forzar nombre de BD para normalización
     });
     
     console.log(`✅ MongoDB Connected successfully!`);
@@ -124,6 +133,7 @@ app.get('/api', (req, res) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/summary', summaryRoutes);
 app.use('/api/foods', foodsRoutes);
+app.use('/api/user', userRoutes);
 
 // -------------------------------
 // 📌 Servir frontend de React (Build)

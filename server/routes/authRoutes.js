@@ -355,4 +355,48 @@ router.put('/update-password', protect, async (req, res) => {
   }
 });
 
+// @desc    Cambiar contraseña
+// @route   POST /api/auth/change-password
+// @access  Private
+router.post('/change-password', protect, async (req, res) => {
+  const { currentPassword, newPassword } = req.body;
+
+  if (!newPassword || newPassword.length < 6) {
+    return res.status(400).json({ message: 'La nueva contraseña debe tener al menos 6 caracteres' });
+  }
+
+  try {
+    const user = await User.findById(req.user._id).select('+password');
+
+    if (!user) {
+      return res.status(404).json({ message: 'Usuario no encontrado' });
+    }
+
+    // Si el usuario tiene contraseña, verificar la actual
+    if (user.password) {
+      if (!currentPassword) {
+        return res.status(400).json({ message: 'La contraseña actual es requerida' });
+      }
+      const isMatch = await user.matchPassword(currentPassword);
+      if (!isMatch) {
+        return res.status(401).json({ message: 'La contraseña actual es incorrecta' });
+      }
+    }
+
+    // Actualizar contraseña
+    user.password = newPassword;
+    await user.save();
+
+    // Enviar nuevo token (opcional, pero buena práctica si se invalidan sesiones)
+    res.json({ 
+      message: 'Contraseña actualizada correctamente',
+      token: generateToken(user._id)
+    });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Error al actualizar contraseña' });
+  }
+});
+
 export default router;
