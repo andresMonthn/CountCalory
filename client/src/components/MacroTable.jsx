@@ -28,8 +28,8 @@ export function MacroTable({ foods, onQtyChange, onGramsChange, onReachEnd }) {
     return acc;
   }, { carbsG: 0, proteinaG: 0, grasasG: 0, calories: 0 });
   return (
-    <div ref={wrapRef} className="mt-3 w-full max-w-[960px] h-[360px] rounded bg-slate-900 text-slate-200 overflow-auto">
-      <table className="w-full table-auto text-xs">
+    <div ref={wrapRef} className="mt-3 w-full max-w-[960px] min-h-[360px] rounded bg-slate-900 text-slate-200 overflow-auto">
+      <table className="w-full min-w-[800px] table-auto text-xs">
         <thead>
           <tr className="text-left border-b border-slate-700">
             <th className="p-2">Alimento</th>

@@ -1,15 +1,12 @@
 import React, { useState } from 'react';
-import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel } from "@/components/ui/alert-dialog";
 import { MetricsPanel } from './Settings/SettingsComponents';
 import { NAV_ITEMS } from "@/config/navigation";
 
 export function NavigationBar({ currentView, onNavigate }) {
-  const [aboutOpen, setAboutOpen] = useState(false);
   const [metricsOpen, setMetricsOpen] = useState(false);
 
   const handleNavClick = (item) => {
     if (item.isDialog) {
-      if (item.id === 'about') setAboutOpen(true);
       if (item.id === 'metrics') setMetricsOpen(true);
     } else {
       onNavigate(item.id);
@@ -60,28 +57,6 @@ export function NavigationBar({ currentView, onNavigate }) {
       </div>
 
       <MetricsPanel isOpen={metricsOpen} onClose={() => setMetricsOpen(false)} />
-
-      <AlertDialog open={aboutOpen} onOpenChange={setAboutOpen}>
-        <AlertDialogContent>
-            <AlertDialogHeader>
-                <AlertDialogTitle>Acerca de CountCalory</AlertDialogTitle>
-                <AlertDialogDescription className="space-y-4 pt-2 text-slate-300">
-                    <p>Tu asistente para calcular y gestionar calorías fácilmente.</p>
-                    <div>
-                        <strong className="text-white">Contacto:</strong><br/>
-                        <a href="mailto:andre.777.monthana@gmail.com" className="text-primary hover:underline">andres.777.monthana@gmail.com</a>
-                    </div>
-                    <div>
-                        <strong className="text-white">Información:</strong><br/>
-                        Versión 1.01
-                    </div>
-                </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-                <AlertDialogCancel onClick={() => setAboutOpen(false)}>Cerrar</AlertDialogCancel>
-            </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </>
   );
 }

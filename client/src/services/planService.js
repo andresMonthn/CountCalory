@@ -1,24 +1,9 @@
-const STEPS = [25, 50, 100, 125, 150];
-const perGram = { carbs: 4, proteina: 4, grasas: 9 };
+import axios from 'axios';
+import { API_URL } from '../config/api';
 
-const LOCAL_FOODS = [
-  { name: "Arroz blanco", calories: 130, carbsG: 28, proteinaG: 2.7, grasasG: 0.3 },
-  { name: "Pasta cocida", calories: 131, carbsG: 25, proteinaG: 5, grasasG: 1.1 },
-  { name: "Pan integral", calories: 247, carbsG: 41, proteinaG: 13, grasasG: 4.2 },
-  { name: "Avena", calories: 389, carbsG: 66, proteinaG: 17, grasasG: 7 },
-  { name: "Patata cocida", calories: 86, carbsG: 20, proteinaG: 1.7, grasasG: 0.1 },
-  { name: "Pechuga de pollo", calories: 165, carbsG: 0, proteinaG: 31, grasasG: 3.6 },
-  { name: "Pavo", calories: 135, carbsG: 0, proteinaG: 29, grasasG: 1 },
-  { name: "Huevo", calories: 143, carbsG: 1.1, proteinaG: 13, grasasG: 9.5 },
-  { name: "Atún", calories: 132, carbsG: 0, proteinaG: 29, grasasG: 0.6 },
-  { name: "Lentejas cocidas", calories: 116, carbsG: 20, proteinaG: 9, grasasG: 0.4 },
-  { name: "Yogur natural", calories: 61, carbsG: 4.7, proteinaG: 3.5, grasasG: 3.3 },
-  { name: "Aguacate", calories: 160, carbsG: 9, proteinaG: 2, grasasG: 15 },
-  { name: "Almendras", calories: 579, carbsG: 22, proteinaG: 21, grasasG: 50 },
-  { name: "Nueces", calories: 654, carbsG: 14, proteinaG: 15, grasasG: 65 },
-  { name: "Aceite de oliva", calories: 884, carbsG: 0, proteinaG: 0, grasasG: 100 },
-  { name: "Queso cheddar", calories: 403, carbsG: 1.3, proteinaG: 25, grasasG: 33 },
-];
+// Generar pasos de 10g en 10g desde 20g hasta 500g para mayor precisión
+const STEPS = Array.from({ length: 49 }, (_, i) => (i + 2) * 10); 
+const perGram = { carbs: 4, proteina: 4, grasas: 9 };
 
 function nearestStep(value) {
   let best = STEPS[0];
@@ -27,21 +12,23 @@ function nearestStep(value) {
     const d = Math.abs(value - s);
     if (d < bestDiff) { best = s; bestDiff = d; }
   }
-  return Math.max(25, Math.min(150, best));
+  return Math.max(20, Math.min(500, best));
 }
 
 function macroRatios(goal) {
-  if (goal === "bajar") return { carbs: 0.4, proteina: 0.35, grasas: 0.25 };
+  if (goal === "bajar") return { carbs: 0.4, proteina: 0.4, grasas: 0.2 }; // Más proteína para saciedad
   if (goal === "subir") return { carbs: 0.5, proteina: 0.3, grasas: 0.2 };
-  return { carbs: 0.5, proteina: 0.25, grasas: 0.25 };
+  return { carbs: 0.45, proteina: 0.3, grasas: 0.25 };
 }
-
-import { API_URL } from '../config/api';
 
 async function fetchFoodsFromApi(terms, limit = 50) {
   const out = [];
   const seen = new Set();
-  for (const t of terms) {
+  
+  // Mezclar términos para variedad en cada llamada si hay muchos
+  const shuffledTerms = terms.sort(() => 0.5 - Math.random());
+
+  for (const t of shuffledTerms) {
     try {
       const api = API_URL + `/foods/search`;
       const res = await axios.get(api, {
@@ -54,59 +41,92 @@ async function fetchFoodsFromApi(terms, limit = 50) {
         const key = p._id || p.name;
         if (seen.has(key)) continue;
         seen.add(key);
+        // Validar que tenga datos mínimos
+        if (!p.calories || p.calories < 1) continue;
+        
         out.push({
           id: p._id,
           name: p.name,
-          calories: p.calories,
-          carbsG: p.carbsG ?? 0,
-          proteinaG: p.proteinaG ?? 0,
-          grasasG: p.grasasG ?? 0,
+          calories: Number(p.calories),
+          carbsG: Number(p.carbsG ?? 0),
+          proteinaG: Number(p.proteinaG ?? 0),
+          grasasG: Number(p.grasasG ?? 0),
         });
       }
-    } catch {}
+    } catch (e) {
+      console.error(`Error fetching term ${t}:`, e);
+    }
   }
   return out;
 }
 
 function pickCandidates(list, macroKey, targetGramsPerMeal, preferredTokens = []) {
   const per100 = (f) => macroKey === 'carbs' ? f.carbsG : macroKey === 'proteina' ? f.proteinaG : f.grasasG;
+  
   const scored = list
-    .filter((f) => (per100(f) || 0) > 0)
+    .filter((f) => (per100(f) || 0) > 1) // Filtrar alimentos con muy poco del macro deseado
     .map((f) => {
-      const gramsNeeded = (targetGramsPerMeal / per100(f)) * 100;
+      const density = per100(f);
+      const gramsNeeded = (targetGramsPerMeal / density) * 100;
+      
+      // Penalizar porciones extremas (muy pequeñas o gigantes)
+      let sizePenalty = 0;
+      if (gramsNeeded < 30) sizePenalty = 20; 
+      if (gramsNeeded > 400) sizePenalty = 20;
+
       const gNearest = nearestStep(gramsNeeded);
       const diff = Math.abs(gNearest - gramsNeeded);
       const name = f.name?.toLowerCase() || "";
       const isPreferred = preferredTokens.some(tok => name.includes(tok));
-      const score = diff + (isPreferred ? -0.75 : 0);
-      return { f, grams: gNearest, diff: score, pref: isPreferred };
+      
+      // Score: menor es mejor
+      // diff: error en gramos vs target
+      // isPreferred: bonificación grande (-50)
+      // Random: factor aleatorio para variedad (0-10)
+      const randomFactor = Math.random() * 10;
+      const score = diff + sizePenalty + (isPreferred ? -50 : 0) + randomFactor;
+      
+      return { f, grams: gNearest, score, pref: isPreferred };
     })
-    .sort((a, b) => a.diff - b.diff);
+    .sort((a, b) => a.score - b.score);
+    
   return scored;
 }
 
 function applyPreferences(pool, preferences = {}) {
   const excludeTokens = [];
-  if (preferences.vegetarian) excludeTokens.push("pollo", "pavo", "cerdo", "res", "carne", "atun", "pescado");
-  if (preferences.noDairy) excludeTokens.push("yogur", "queso", "leche");
-  if (preferences.noNuts) excludeTokens.push("almendra", "nuez", "cacahuate", "maní");
-  let list = pool.filter(f => !excludeTokens.some(tok => f.name.toLowerCase().includes(tok)));
+  if (preferences.vegetarian) excludeTokens.push("pollo", "pavo", "cerdo", "res", "carne", "atun", "pescado", "salmon", "bistec", "jamon", "tocino");
+  if (preferences.noDairy) excludeTokens.push("yogur", "queso", "leche", "crema", "mantequilla");
+  if (preferences.noNuts) excludeTokens.push("almendra", "nuez", "cacahuate", "maní", "pistache", "avellana");
+  
+  let list = pool.filter(f => {
+    const name = f.name.toLowerCase();
+    return !excludeTokens.some(tok => name.includes(tok));
+  });
+
   const preferred = [];
   if (preferences.preferRice) preferred.push("arroz");
   if (preferences.preferPasta) preferred.push("pasta");
   if (preferences.preferChicken) preferred.push("pollo");
-  if (preferences.preferFish) preferred.push("atun", "pescado");
+  if (preferences.preferFish) preferred.push("atun", "pescado", "salmon");
+  
+  if (preferences.cheatMeals && Array.isArray(preferences.cheatMeals)) {
+    preferred.push(...preferences.cheatMeals);
+  }
+
   return { list, preferred };
 }
 
 export async function generateBalancedPlan({ budget, goal, mealsCount = 3, preferences = {}, exercise = 0, currentConsumed = 0 }) {
   const ratios = macroRatios(goal);
   const targetTotal = Math.max(0, (Number(budget) || 0) + (Number(exercise) || 0) - (Number(currentConsumed) || 0));
+  
   const targetsCals = {
     carbs: targetTotal * ratios.carbs,
     proteina: targetTotal * ratios.proteina,
     grasas: targetTotal * ratios.grasas,
   };
+  
   const targetsGrams = {
     carbs: targetsCals.carbs / perGram.carbs,
     proteina: targetsCals.proteina / perGram.proteina,
@@ -114,63 +134,121 @@ export async function generateBalancedPlan({ budget, goal, mealsCount = 3, prefe
   };
 
   const terms = {
-    carbs: ["arroz", "pasta", "pan", "avena", "patata"],
-    proteina: ["pollo", "pavo", "huevo", "atun", "lentejas", "yogur"],
-    grasas: ["aguacate", "almendra", "nuez", "aceite", "queso"],
+    carbs: ["arroz", "pasta", "pan", "avena", "patata", "quinoa", "batata", "tortilla", "fruta", "platano", "manzana", "frijoles"],
+    proteina: ["pollo", "pavo", "huevo", "atun", "lentejas", "yogur", "carne", "pescado", "tofu", "frijoles", "salmon", "res", "bistec"],
+    grasas: ["aguacate", "almendra", "nuez", "aceite", "queso", "chia", "cacahuate", "mantequilla", "aceituna"],
   };
 
-  const BROAD_TERMS = ["a", "e", "i", "o", "u", "ra", "pa", "po", "le", "yo", "nu", "av", "al"];
-  const apiFoods = await fetchFoodsFromApi([...terms.carbs, ...terms.proteina, ...terms.grasas, ...BROAD_TERMS]);
-  const basePool = apiFoods.length ? apiFoods : LOCAL_FOODS;
+  const cheatTerms = preferences.cheatMeals || [];
+  
+  // Términos más específicos para evitar basura
+  const EXTRA_TERMS = ["verdura", "ensalada", "sopa", "crema", "filete", "tostada", "sandwich", "bowl"];
+  
+  // Fetch robusto
+  const searchList = [...new Set([...terms.carbs, ...terms.proteina, ...terms.grasas, ...EXTRA_TERMS, ...cheatTerms])];
+  const apiFoods = await fetchFoodsFromApi(searchList, 30); // Límite por término
+  
+  const basePool = apiFoods;
   const { list: pool, preferred } = applyPreferences(basePool, preferences);
+
+  // Si el pool es muy pequeño, es un problema. Deberíamos tener al menos 20 items.
+  if (pool.length < 10) {
+    console.warn("Pool de alimentos muy pequeño:", pool.length);
+  }
 
   const usedGlobal = new Set();
   const items = [];
+  
   for (let mealIndex = 1; mealIndex <= mealsCount; mealIndex++) {
-    const usedMeal = new Set();
-    for (const key of ["carbs", "proteina", "grasas"]) {
+    const usedMeal = new Set(); // Reset por comida para evitar duplicados en EL MISMO plato
+    
+    for (const key of ["proteina", "carbs", "grasas"]) { // Orden: Proteína primero suele ser mejor
       const targetPerMeal = targetsGrams[key] / mealsCount;
-      let candidates = pickCandidates(pool, key, targetPerMeal, preferred).filter(({ f }) => !usedGlobal.has(f.name) && !usedMeal.has(f.name));
-      const top = candidates.slice(0, 6);
-      const chosen = top.length ? top[Math.floor(Math.random() * top.length)] : null;
-      const chosenFood = chosen?.f || pool.find(f => !used.has(f.name)) || pool[0];
-      const grams = chosen?.grams ?? nearestStep(100);
+      
+      // 1. Intentar buscar no usados globalmente
+      let candidates = pickCandidates(pool, key, targetPerMeal, preferred)
+        .filter(({ f }) => !usedGlobal.has(f.name) && !usedMeal.has(f.name));
+      
+      // 2. Si no hay, buscar no usados en esta comida (permitir repetir de otra comida)
+      if (candidates.length === 0) {
+        candidates = pickCandidates(pool, key, targetPerMeal, preferred)
+          .filter(({ f }) => !usedMeal.has(f.name));
+      }
+
+      // Selección con variedad: tomar de los mejores X pero con aleatoriedad
+      const topCount = Math.min(candidates.length, 8);
+      const chosenWrapper = topCount > 0 ? candidates[Math.floor(Math.random() * topCount)] : null;
+      
+      let chosenFood = chosenWrapper?.f;
+      let grams = chosenWrapper?.grams;
+
+      // Fallback final de emergencia: Random del pool total que no esté en esta comida
+      if (!chosenFood) {
+        const validPool = pool.filter(f => !usedMeal.has(f.name));
+        if (validPool.length > 0) {
+            chosenFood = validPool[Math.floor(Math.random() * validPool.length)];
+            // Calcular gramos aproximados para este fallback
+            const density = (key === 'carbs' ? chosenFood.carbsG : key === 'proteina' ? chosenFood.proteinaG : chosenFood.grasasG) || 10;
+            grams = nearestStep((targetPerMeal / density) * 100);
+        }
+      }
+
+      if (!chosenFood) continue;
+
       usedMeal.add(chosenFood.name);
       usedGlobal.add(chosenFood.name);
+      
       items.push({
         name: chosenFood.name,
-        calories: chosenFood.calories,
-        carbsG: chosenFood.carbsG,
-        proteinaG: chosenFood.proteinaG,
-        grasasG: chosenFood.grasasG,
+        calories: Number(chosenFood.calories),
+        carbsG: Number(chosenFood.carbsG),
+        proteinaG: Number(chosenFood.proteinaG),
+        grasasG: Number(chosenFood.grasasG),
         qty: 1,
-        grams,
+        grams: grams || 100,
         mealIndex,
       });
     }
   }
-  const plannedCals = items.reduce((sum, it) => sum + Number(it.calories || 0) * (Number(it.grams || 100) / 100) * (Number(it.qty || 1)), 0);
-  if (plannedCals > 0 && targetTotal > 0) {
-    const scale = targetTotal / plannedCals;
+
+  // Ajuste fino iterativo
+  let iterations = 0;
+  const MAX_ITERATIONS = 10;
+  
+  while (iterations < MAX_ITERATIONS) {
+    const currentTotal = items.reduce((sum, it) => sum + (it.calories * (it.grams / 100) * it.qty), 0);
+    const delta = targetTotal - currentTotal;
+    
+    // Si estamos cerca (±50 cal), terminamos
+    if (Math.abs(delta) < 50) break;
+    
+    const scale = targetTotal / (currentTotal || 1);
+    
+    // Aplicar escala suave
+    let changed = false;
     for (const it of items) {
-      const g = Number(it.grams || 100);
-      const nextG = nearestStep(Math.max(25, Math.min(150, g * scale)));
-      it.grams = nextG;
-    }
-    const recalced = items.reduce((sum, it) => sum + Number(it.calories || 0) * (Number(it.grams || 100) / 100) * (Number(it.qty || 1)), 0);
-    const delta = targetTotal - recalced;
-    if (Math.abs(delta) >= 100) {
-      const dir = delta > 0 ? 1 : -1;
-      let idx = items.reduce((bestIdx, it, i) => {
-        const dens = Number(it.calories || 0);
-        return (bestIdx === -1 || (dir > 0 ? dens > Number(items[bestIdx].calories || 0) : dens < Number(items[bestIdx].calories || 0))) ? i : bestIdx;
-      }, -1);
-      if (idx >= 0) {
-        const g = Number(items[idx].grams || 100);
-        const step = dir > 0 ? Math.min(150, g + 25) : Math.max(25, g - 25);
-        items[idx].grams = nearestStep(step);
+      const oldGrams = it.grams;
+      // Escalar pero mantener dentro de límites razonables
+      let newGrams = nearestStep(it.grams * scale);
+      
+      // Si la escala no cambió nada, forzar un paso si el delta es grande
+      if (newGrams === oldGrams && Math.abs(delta) > 100) {
+         if (delta > 0) newGrams += 10;
+         else newGrams -= 10;
+      }
+      
+      // Límites duros
+      newGrams = Math.max(20, Math.min(600, newGrams));
+      
+      if (newGrams !== oldGrams) {
+        it.grams = newGrams;
+        changed = true;
       }
     }
+    
+    if (!changed) break; // Si no pudimos cambiar nada, salir
+    iterations++;
   }
+
   return items;
 }

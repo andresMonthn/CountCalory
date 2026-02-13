@@ -6,7 +6,7 @@ import { useAlert } from "@/context/AlertContext";
 import { Lock, RefreshCw, CheckCircle, XCircle } from "lucide-react";
 import { Modal } from "@/components/ui/modal";
 
-const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:4000/api';
+const apiUrl = import.meta.env.VITE_API_URL || 'https://countcalory.vercel.app/api';
 
 export function PasswordForm() {
     const { user, updateUser } = useAuth();
@@ -124,7 +124,7 @@ export function PasswordForm() {
 }
 
 export function MetricsPanel({ isOpen, onClose }) {
-    const { user } = useAuth();
+    const { user, logout } = useAuth();
     const [metrics, setMetrics] = useState(null);
     const [loading, setLoading] = useState(true);
 
@@ -136,12 +136,19 @@ export function MetricsPanel({ isOpen, onClose }) {
 
     const fetchMetrics = async () => {
         try {
+            const token = user?.token || localStorage.getItem('token');
+            if (!token) return;
+
             const { data } = await axios.get(`${apiUrl}/user/metrics`, {
-                headers: { Authorization: `Bearer ${user.token}` }
+                headers: { Authorization: `Bearer ${token}` }
             });
             setMetrics(data);
         } catch (error) {
             console.error("Error fetching metrics", error);
+            if (error.response?.status === 401) {
+                logout();
+                onClose();
+            }
         } finally {
             setLoading(false);
         }

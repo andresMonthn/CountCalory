@@ -52,9 +52,11 @@ export function ExerciseSection({ exerciseOptions, selectedExercises, setSelecte
           );
         })}
       </div>
-      <Button onClick={addExercise} className="bg-green-500 hover:bg-green-600 text-white agregarejercicio">
-        Agregar ejercicio
-      </Button>
+      <div className="flex justify-center mt-4">
+        <Button onClick={addExercise} className="bg-green-500 hover:bg-green-600 text-white agregarejercicio">
+          Agregar ejercicio
+        </Button>
+      </div>
       {exerciseList.length > 0 && (
         <ul className="mt-2">
           {exerciseList.map((e, i) => (

@@ -15,8 +15,8 @@ import { useOnline } from "@/hooks/useOnline";
 import { useHistoryPolling } from "@/hooks/useHistoryPolling";
 import { saveSummaryData } from "@/services/summaryService";
 import { generateBalancedPlan } from "@/services/planService";
-import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter } from "@/components/ui/alert-dialog";
-import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
+import { DietPlanWizard } from "@/components/DietPlanWizard";
+import { BuscadorAlimentos } from "@/components/BuscadorAlimentos";
 import { useAuth } from '@/context/AuthContext';
 import { useAlert } from '@/context/AlertContext';
 import axios from 'axios';
@@ -42,8 +42,7 @@ export default function CalculatorApp() {
   const [goal, setGoal] = useState("mantener");
   const [activity, setActivity] = useState("");
   const [mealsCount, setMealsCount] = useState(3);
-  const [prefOpen, setPrefOpen] = useState(false);
-  const [previewOpen, setPreviewOpen] = useState(false);
+  const [wizardOpen, setWizardOpen] = useState(false);
   const [previewPlan, setPreviewPlan] = useState([]);
   const [prefs, setPrefs] = useState({
     vegetarian: false,
@@ -53,6 +52,7 @@ export default function CalculatorApp() {
     preferPasta: false,
     preferChicken: true,
     preferFish: false,
+    cheatMeals: [],
   });
   const [lastPrefs, setLastPrefs] = useState(null);
   const [selectedExercises, setSelectedExercises] = useState([]);
@@ -61,9 +61,9 @@ export default function CalculatorApp() {
   const [output, setOutput] = useState(null);
   const [loading, setLoading] = useState(false);
   const isOnline = useOnline();
-  const { history, refresh } = useHistoryPolling(isOnline);
   const { user, logout, updateUser } = useAuth();
   const { success, error: showError } = useAlert();
+  const { history, refresh } = useHistoryPolling(isOnline && !!user);
 
   // Load user profile data on mount
   useEffect(() => {
@@ -133,18 +133,18 @@ export default function CalculatorApp() {
     const currentConsumed = 0;
     const planItems = await generateBalancedPlan({ budget, goal, mealsCount, preferences, exercise: exerciseTotal, currentConsumed });
     setPreviewPlan(planItems);
-    setPreviewOpen(true);
     if (preferences) setLastPrefs(preferences);
+    return planItems;
   };
 
   const acceptPlan = () => {
     setFoodList(previewPlan);
-    setPreviewOpen(false);
+    setWizardOpen(false);
     setPreviewPlan([]);
   };
 
   const declinePlan = () => {
-    setPreviewOpen(false);
+    setWizardOpen(false);
     setPreviewPlan([]);
   };
 
@@ -153,6 +153,7 @@ export default function CalculatorApp() {
     const currentConsumed = 0;
     const planItems = await generateBalancedPlan({ budget, goal, mealsCount, preferences: lastPrefs || prefs, exercise: exerciseTotal, currentConsumed });
     setPreviewPlan(planItems);
+    return planItems;
   };
 
   useEffect(() => {
@@ -174,7 +175,7 @@ export default function CalculatorApp() {
     <>
       <SetPasswordDialog />
       <NavigationBar currentView={currentView} onNavigate={setCurrentView} />
-      <div className="pb-32 transition-all duration-300">
+      <div className="pt-12 pb-32 transition-all duration-300">
         <div className="max-w-[1024px] mx-auto px-3 sm:px-4">
           <Header />
           <div className="CalorieCounter">
@@ -209,52 +210,12 @@ export default function CalculatorApp() {
                 </div>
 
                 <div className="flex justify-center mb-6">
-                  <Popover open={prefOpen} onOpenChange={setPrefOpen}>
-                    <PopoverTrigger asChild>
-                      <Button className="bg-green-600 hover:bg-green-700 text-white">
-                        Generar Plan Alimentario
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent side="bottom" align="center" sideOffset={8} className="w-[320px]">
-                      <div className="flex flex-col gap-2 text-sm">
-                        <div className="font-semibold">Preferencias alimentarias</div>
-                        <label className="flex items-center gap-2">
-                          <input type="checkbox" checked={prefs.vegetarian} onChange={(e) => setPrefs({ ...prefs, vegetarian: e.target.checked })} />
-                          <span>Vegetariano</span>
-                        </label>
-                        <label className="flex items-center gap-2">
-                          <input type="checkbox" checked={prefs.noDairy} onChange={(e) => setPrefs({ ...prefs, noDairy: e.target.checked })} />
-                          <span>Sin lácteos</span>
-                        </label>
-                        <label className="flex items-center gap-2">
-                          <input type="checkbox" checked={prefs.noNuts} onChange={(e) => setPrefs({ ...prefs, noNuts: e.target.checked })} />
-                          <span>Sin frutos secos</span>
-                        </label>
-                        <hr className="my-1 border-slate-700" />
-                        <div className="font-semibold">Preferencias de macros</div>
-                        <label className="flex items-center gap-2">
-                          <input type="checkbox" checked={prefs.preferRice} onChange={(e) => setPrefs({ ...prefs, preferRice: e.target.checked })} />
-                          <span>Preferir arroz</span>
-                        </label>
-                        <label className="flex items-center gap-2">
-                          <input type="checkbox" checked={prefs.preferPasta} onChange={(e) => setPrefs({ ...prefs, preferPasta: e.target.checked })} />
-                          <span>Preferir pasta</span>
-                        </label>
-                        <label className="flex items-center gap-2">
-                          <input type="checkbox" checked={prefs.preferChicken} onChange={(e) => setPrefs({ ...prefs, preferChicken: e.target.checked })} />
-                          <span>Preferir pollo</span>
-                        </label>
-                        <label className="flex items-center gap-2">
-                          <input type="checkbox" checked={prefs.preferFish} onChange={(e) => setPrefs({ ...prefs, preferFish: e.target.checked })} />
-                          <span>Preferir pescado</span>
-                        </label>
-                        <div className="flex gap-2 mt-2">
-                          <Button className="bg-slate-700 text-white" variant="secondary" onClick={() => setPrefOpen(false)}>Cancelar</Button>
-                          <Button className="ml-auto bg-green-600 hover:bg-green-700 text-white" onClick={() => { generatePlan(prefs); setPrefOpen(false); }}>Generar</Button>
-                        </div>
-                      </div>
-                    </PopoverContent>
-                  </Popover>
+                  <Button 
+                    className="bg-green-600 hover:bg-green-700 text-white shadow-[0_0_10px_rgba(74,222,128,0.4)] hover:shadow-[0_0_20px_rgba(74,222,128,0.6)] transition-all duration-300"
+                    onClick={() => setWizardOpen(true)}
+                  >
+                    Generar Plan Alimentario
+                  </Button>
                 </div>
                 
                 <div className="flex items-center justify-center w-full">
@@ -287,9 +248,17 @@ export default function CalculatorApp() {
                   exerciseList={exerciseList}
                   removeExercise={removeExercise}
                 />
-                <Button onClick={calculate} className="calcular">Calcular resumen</Button>
-                <Button onClick={limpiar} className="calcular" variant="secondary">Limpiar</Button>
+                <div className="flex justify-center gap-4 mt-6">
+                  <Button onClick={calculate} className="calcular">Calcular resumen</Button>
+                  <Button onClick={limpiar} className="calcular" variant="secondary">Limpiar</Button>
+                </div>
                 <SummaryPanel output={output} loading={loading} onSave={saveSummary} />
+              </div>
+            )}
+
+            {currentView === "search" && (
+              <div className="animate-fade-in">
+                <BuscadorAlimentos />
               </div>
             )}
 
@@ -301,34 +270,18 @@ export default function CalculatorApp() {
           </div>
         </div>
       </div>
-      <AlertDialog open={previewOpen} onOpenChange={setPreviewOpen}>
-        <AlertDialogContent className="w-[96%] max-w-[800px]">
-          <AlertDialogHeader>
-            <AlertDialogTitle>Vista previa del plan alimentario</AlertDialogTitle>
-            <AlertDialogDescription>
-              Revisa el plan generado. Puedes ajustar las cantidades antes de aceptar.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <div className="my-2">
-            <MacroTable
-              foods={previewPlan}
-              onQtyChange={(index, nextQty) => {
-                const next = previewPlan.map((f, i) => i === index ? { ...f, qty: nextQty } : f);
-                setPreviewPlan(next);
-              }}
-              onGramsChange={(index, nextGrams) => {
-                const next = previewPlan.map((f, i) => i === index ? { ...f, grams: nextGrams } : f);
-                setPreviewPlan(next);
-              }}
-            />
-          </div>
-          <AlertDialogFooter>
-            <Button variant="outline" onClick={declinePlan}>Declinar</Button>
-            <Button variant="secondary" onClick={regeneratePlan}>Volver a regenerar</Button>
-            <Button className="bg-green-600 hover:bg-green-700 text-white" onClick={acceptPlan}>Aceptar</Button>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <DietPlanWizard
+        open={wizardOpen}
+        onOpenChange={setWizardOpen}
+        prefs={prefs}
+        setPrefs={setPrefs}
+        onGenerate={generatePlan}
+        plan={previewPlan}
+        onAccept={acceptPlan}
+        onDecline={declinePlan}
+        onRegenerate={regeneratePlan}
+        onPlanChange={setPreviewPlan}
+      />
       <SetPasswordDialog />
     </>
   );

@@ -121,7 +121,7 @@ export function ProfilePanel({ gender, setGender, heightCm, setHeightCm, weightK
               </div>
            </div>
 
-           <div className="flex gap-3 items-center w-full md:w-auto justify-end">
+           <div className="flex flex-wrap gap-3 items-center w-full md:w-auto justify-end">
               <BudgetDisplay budget={budget} />
               <Button onClick={handleSave} disabled={loading} size="sm" className="bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg shadow-emerald-900/20 transition-all active:scale-95">
                   {loading ? <RefreshCw size={16} className="mr-2 animate-spin" /> : <Save size={16} className="mr-2" />}
