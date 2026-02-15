@@ -1,15 +1,16 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Mail, Lock, ArrowRight, Loader2, CheckCircle2, AlertCircle, Sparkles } from 'lucide-react';
+import { Mail, Lock, ArrowRight, Loader2, CheckCircle2, AlertCircle, Sparkles, Eye, EyeOff } from 'lucide-react';
 
 export default function LoginPage() {
   const [mode, setMode] = useState('login'); // 'login' | 'register'
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [status, setStatus] = useState('idle'); // idle, loading, success, error
   const [message, setMessage] = useState('');
   const { login, loginWithPassword, user } = useAuth();
@@ -27,6 +28,7 @@ export default function LoginPage() {
     setStatus('idle');
     setMessage('');
     setPassword('');
+    setShowPassword(false);
   }, [mode]);
 
   const validateEmail = (email) => {
@@ -175,19 +177,22 @@ export default function LoginPage() {
                 <div className="space-y-4">
                   <div className="space-y-2">
                     <label className="text-sm font-medium text-slate-300 flex items-center gap-2">
-                      <Mail size={16} /> Correo Electrónico
+                        Correo Electrónico
                     </label>
-                    <Input
-                      type="email"
-                      placeholder="tu@email.com"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      className="bg-slate-950/50 border-slate-700 text-slate-100 focus:ring-2 focus:ring-offset-0 transition-all focus:border-transparent"
-                      style={{
-                        '--tw-ring-color': mode === 'login' ? 'rgb(99 102 241)' : 'rgb(16 185 129)'
-                      }}
-                    />
-                  </div>
+                      <div className="relative">
+                        <Mail size={16} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400" />
+                        <Input
+                          type="email"
+                          placeholder="tu@email.com"
+                          value={email}
+                          onChange={(e) => setEmail(e.target.value)}
+                          className="bg-slate-950/50 border-slate-700 text-slate-100 focus:ring-2 focus:ring-offset-0 transition-all focus:border-transparent pl-10"
+                          style={{
+                            '--tw-ring-color': mode === 'login' ? 'rgb(99 102 241)' : 'rgb(16 185 129)'
+                          }}
+                        />
+                      </div>
+                    </div>
 
                   <AnimatePresence>
                     {mode === 'login' && (
@@ -198,15 +203,26 @@ export default function LoginPage() {
                         className="space-y-2"
                       >
                         <label className="text-sm font-medium text-slate-300 flex items-center gap-2">
-                          <Lock size={16} /> Contraseña
+                            Contraseña
                         </label>
-                        <Input
-                          type="password"
-                          placeholder="••••••••"
-                          value={password}
-                          onChange={(e) => setPassword(e.target.value)}
-                          className="bg-slate-950/50 border-slate-700 text-slate-100 focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                        />
+                          <div className="relative">
+                            <Lock size={16} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400" />
+                            <Input
+                              type={showPassword ? "text" : "password"}
+                              placeholder="••••••••"
+                              value={password}
+                              onChange={(e) => setPassword(e.target.value)}
+                              className="bg-slate-950/50 border-slate-700 text-slate-100 focus:ring-2 focus:ring-indigo-500 focus:border-transparent pl-10 pr-10"
+                            />
+                            <button
+                            type="button"
+                            onClick={() => setShowPassword(!showPassword)}
+                            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-slate-200 focus:outline-none"
+                            aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+                          >
+                              {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                            </button>
+                          </div>
                       </motion.div>
                     )}
                   </AnimatePresence>
@@ -246,11 +262,20 @@ export default function LoginPage() {
           </AnimatePresence>
         </div>
         
-        <p className="text-center text-xs text-slate-600 mt-6">
-          {mode === 'login' 
-            ? '¿Olvidaste tu contraseña? Usa el modo registro para recibir un enlace mágico.' 
-            : 'Te enviaremos un enlace seguro para acceder sin contraseña.'}
-        </p>
+        <div className="text-center mt-6 space-y-2">
+          {mode === 'login' && (
+            <p className="text-sm">
+              <Link to="/forgot-password" className="text-indigo-400 hover:text-indigo-300 transition-colors">
+                ¿Olvidaste tu contraseña? click aquí
+              </Link>
+            </p>
+          )}
+          <p className="text-xs text-slate-600">
+            {mode === 'login' 
+              ? '¿No tienes cuenta? Usa el modo registro.'
+              : 'Te enviaremos un enlace seguro para acceder sin contraseña.'}
+          </p>
+        </div>
       </motion.div>
     </div>
   );

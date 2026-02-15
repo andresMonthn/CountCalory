@@ -15,5 +15,10 @@ export default defineConfig({
     host: '0.0.0.0', // Explicitly bind to all interfaces
     port: 5173,
     strictPort: true,
+  },
+  test: {
+    environment: 'happy-dom',
+    setupFiles: './src/setupTests.js',
+    globals: true,
   }
 })

@@ -1,11 +1,23 @@
 import express from 'express';
 import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
+import rateLimit from 'express-rate-limit';
 import User from '../models/User.js';
 import { protect } from '../middleware/authMiddleware.js';
 import { sendEmail } from '../utils/sendEmail.js';
 
 const router = express.Router();
+
+// Rate Limiter for Password Reset
+const passwordResetLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 5, // Limit each IP to 5 requests per windowMs
+  message: {
+    message: 'Demasiados intentos de restablecimiento de contraseña desde esta IP, por favor intente de nuevo después de 15 minutos.'
+  },
+  standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
+  legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+});
 
 // @desc    Status check for Auth Routes
 // @route   GET /api/auth/
@@ -397,6 +409,174 @@ router.post('/change-password', protect, async (req, res) => {
     console.error(error);
     res.status(500).json({ message: 'Error al actualizar contraseña' });
   }
+});
+
+// @desc    Check if user exists (for forgot password)
+// @route   POST /api/auth/check-user
+// @access  Public
+router.post('/check-user', async (req, res) => {
+    const { email } = req.body;
+    try {
+        const user = await User.findOne({ email: email.toLowerCase() });
+        // Always return success to avoid user enumeration, but frontend might need to know if email is valid format
+        // The prompt says: "Muestra mensajes apropiados: 'Si el correo existe, recibirás instrucciones'"
+        // So we just return success.
+        res.json({ message: 'If the user exists, we will proceed.' });
+    } catch (error) {
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
+// @desc    Forgot Password - Send Email
+// @route   POST /api/auth/forgot-password
+// @access  Public
+router.post('/forgot-password', passwordResetLimiter, async (req, res) => {
+    const { email } = req.body;
+
+    if (!email) {
+        return res.status(400).json({ message: 'Email is required' });
+    }
+
+    try {
+        const user = await User.findOne({ email: email.toLowerCase() });
+
+        if (!user) {
+            // Don't reveal user existence
+            return res.status(200).json({ message: 'Email sent if user exists' });
+        }
+
+        // Generate Reset Token
+        const resetToken = crypto.randomBytes(32).toString('hex');
+        const resetTokenExpires = Date.now() + 60 * 60 * 1000; // 1 hour
+
+        // Hash token before saving (optional but recommended, here keeping simple as requested/consistent)
+        user.resetPasswordToken = resetToken;
+        user.resetPasswordExpires = resetTokenExpires;
+        await user.save();
+
+        // Construct Link
+        let clientUrl = process.env.CLIENT_URL;
+        if (!clientUrl && req.get('origin')) {
+            clientUrl = req.get('origin');
+        }
+        if (!clientUrl) {
+            clientUrl = 'http://localhost:5173';
+        }
+
+        const resetUrl = `${clientUrl}/reset-password?token=${resetToken}`;
+
+        const message = `
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <meta charset="utf-8">
+                <style>
+                    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f4f5; margin: 0; padding: 0; }
+                    .container { max-width: 600px; margin: 40px auto; background: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+                    .header { background-color: #10b981; padding: 20px; text-align: center; color: white; }
+                    .content { padding: 30px; color: #334155; line-height: 1.6; }
+                    .button { display: inline-block; padding: 12px 24px; background-color: #10b981; color: white; text-decoration: none; border-radius: 6px; font-weight: bold; margin-top: 20px; }
+                    .footer { padding: 20px; text-align: center; font-size: 12px; color: #94a3b8; border-top: 1px solid #e2e8f0; }
+                </style>
+            </head>
+            <body>
+                <div class="container">
+                    <div class="header">
+                        <h1>Recuperación de Contraseña</h1>
+                    </div>
+                    <div class="content">
+                        <p>Hola,</p>
+                        <p>Hemos recibido una solicitud para restablecer la contraseña de tu cuenta en CountCalory.</p>
+                        <p>Para continuar, haz clic en el siguiente botón:</p>
+                        <div style="text-align: center;">
+                            <a href="${resetUrl}" class="button">Restablecer Contraseña</a>
+                        </div>
+                        <p style="margin-top: 30px; font-size: 14px;">Si no solicitaste este cambio, puedes ignorar este correo de forma segura. El enlace expirará en 1 hora.</p>
+                    </div>
+                    <div class="footer">
+                        &copy; ${new Date().getFullYear()} CountCalory. Todos los derechos reservados.
+                    </div>
+                </div>
+            </body>
+            </html>
+        `;
+
+        await sendEmail({
+            to: user.email,
+            subject: '🔑 Restablecimiento de contraseña - CountCalory',
+            html: message
+        });
+
+        res.status(200).json({ message: 'Email sent' });
+
+    } catch (error) {
+        console.error(error);
+        user.resetPasswordToken = undefined;
+        user.resetPasswordExpires = undefined;
+        await user.save({ validateBeforeSave: false });
+        res.status(500).json({ message: 'Email could not be sent' });
+    }
+});
+
+// @desc    Verify Reset Token
+// @route   GET /api/auth/verify-token
+// @access  Public
+router.get('/verify-token', async (req, res) => {
+    const { token } = req.query;
+
+    if (!token) {
+        return res.status(400).json({ valid: false, message: 'Token is missing' });
+    }
+
+    try {
+        const user = await User.findOne({
+            resetPasswordToken: token,
+            resetPasswordExpires: { $gt: Date.now() }
+        });
+
+        if (!user) {
+            return res.status(400).json({ valid: false, message: 'Invalid or expired token' });
+        }
+
+        res.status(200).json({ valid: true, message: 'Token is valid' });
+    } catch (error) {
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
+// @desc    Reset Password
+// @route   POST /api/auth/reset-password
+// @access  Public
+router.post('/reset-password', passwordResetLimiter, async (req, res) => {
+    const { token, password } = req.body;
+
+    if (!token || !password) {
+        return res.status(400).json({ message: 'Token and password are required' });
+    }
+
+    try {
+        const user = await User.findOne({
+            resetPasswordToken: token,
+            resetPasswordExpires: { $gt: Date.now() }
+        });
+
+        if (!user) {
+            return res.status(400).json({ message: 'Invalid or expired token' });
+        }
+
+        // Set new password
+        user.password = password;
+        user.resetPasswordToken = undefined;
+        user.resetPasswordExpires = undefined;
+
+        await user.save();
+
+        res.status(200).json({ success: true, message: 'Password reset successful' });
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server error' });
+    }
 });
 
 export default router;
